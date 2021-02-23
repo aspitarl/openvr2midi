@@ -1,0 +1,3 @@
+[submodule "triad_openvr"]
+	path = triad_openvr
+	url = https://github.com/aspitarl/triad_openvr

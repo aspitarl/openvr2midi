@@ -1,11 +1,11 @@
 from triad_openvr import triad_openvr
 import time
 import sys
-import rtmidi
+import mido
 import os
 import signal
 
-from rtmidi.midiconstants import CONTROL_CHANGE, PITCH_BEND
+# from rtmidi.midiconstants import CONTROL_CHANGE, PITCH_BEND
 
 interval = 1/250
 # interval = 0
@@ -46,13 +46,13 @@ elif controller_name == "controller_2":
 
     midiportname = 'Controller B'
 
-midiout = rtmidi.MidiOut()
-available_ports = midiout.get_ports()
+# midiout = rtmidi.MidiOut()
+available_ports = mido.get_output_names()
 
 def signal_handler(signal, frame):
     """Runs and exits when crtl-C is pressed"""
     print("\nprogram exiting gracefully")
-    midiout.close_port()
+    midiout.close()
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
@@ -65,7 +65,7 @@ midi_connected = False
 for i, port in enumerate(available_ports):
     if midiportname in port:
         print('Connecting to midi port: ' + port)
-        midiout.open_port(i)
+        midiout = port = mido.open_output(port)
         midi_connected = True
 
 if not midi_connected:
@@ -111,6 +111,9 @@ def scale_data(data_raw, cube_ranges, dim, half):
         scaled = 0
     elif scaled > outscale:
         scaled = outscale
+
+    #Added for conversion to mido, believe rtmidi was converting inside api
+    scaled = int(scaled)
 
     return scaled
 
@@ -209,35 +212,40 @@ while(running):
             if debug: debugstr = debugstr + '\nScaled Pose: ' + str(data_scaled)
 
             if inputs['button'] == senddatabutton or inputs['trackpad_touched']:
-                ccx = [CONTROL_CHANGE, cc_dict['x'], data_scaled['x']]
-                midiout.send_message(ccx)            
-                ccy = [CONTROL_CHANGE, cc_dict['y'], data_scaled['y']]
-                midiout.send_message(ccy)                  
-                ccz = [CONTROL_CHANGE, cc_dict['z'], data_scaled['z']]
-                midiout.send_message(ccz)  
+                ccx = mido.Message('control_change',control=cc_dict['x'], value=data_scaled['x'])
+                # ccx = [CONTROL_CHANGE, cc_dict['x'], data_scaled['x']]
+                midiout.send(ccx)            
+                ccy = mido.Message('control_change',control=cc_dict['y'], value=data_scaled['y'])
+                midiout.send(ccy)                  
+                ccz = mido.Message('control_change',control=cc_dict['z'], value=data_scaled['z'])
+                midiout.send(ccz)  
 
                 if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
                 if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)
                 if debug: debugstr = debugstr + '\nCCz Message: ' + str(ccz)
 
-                if inputs['trackpad_touched']:
-                    tpy = int(inputs['trackpad_y']*64+64)
+            ### Not sure exactly how pitchbend works in mido, use 'pitch wheel'?
 
-                    # cctpy = [CONTROL_CHANGE, cc_dict['tpy'], tpy]
-                    # midiout.send_message(cctpy)  
+            #     if inputs['trackpad_touched']:
+            #         tpy = int(inputs['trackpad_y']*64+64)
+
+            #         # cctpy = [CONTROL_CHANGE, cc_dict['tpy'], tpy]
+            #         # midiout.send_message(cctpy)  
 
 
-                    pb = tpy
-                    pb = [PITCH_BEND, 0 , pb]
-                    midiout.send_message(pb)
+            #         pb = tpy
+            #         # pb = [PITCH_BEND, 0 , pb]
+            #         pb = mido.Message('pitchwheel', value=pb)
+            #         midiout.send(pb)
 
-                    # if debug: debugstr = debugstr + '\npb Message: ' + str(pb)
-                    trackpad_reset = True
-            else:
-                if trackpad_reset:
-                    cctpy = [CONTROL_CHANGE, cc_dict['tpy'], 64]
-                    midiout.send_message(cctpy)
-                    trackpad_reset = False
+            #         # if debug: debugstr = debugstr + '\npb Message: ' + str(pb)
+            #         trackpad_reset = True
+            # else:
+            #     if trackpad_reset:
+            #         # cctpy = [CONTROL_CHANGE, cc_dict['tpy'], 64]
+            #         cctpy= mido.Message('control_change',control=cc_dict['tpy'], value=64)
+            #         midiout.send(cctpy)
+            #         trackpad_reset = False
                     
 
 

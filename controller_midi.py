@@ -8,7 +8,6 @@ import signal
 # from rtmidi.midiconstants import CONTROL_CHANGE, PITCH_BEND
 
 interval = 1/250
-# interval = 0
 
 print('wait interval is ' + str(interval))
 
@@ -34,6 +33,7 @@ if controller_name == "controller_1":
     'tpy':25,
 }
 
+    # midiportname = 'rtpMIDI-Laptop'
     midiportname = 'Controller A'
 
 elif controller_name == "controller_2":
@@ -46,7 +46,6 @@ elif controller_name == "controller_2":
 
     midiportname = 'Controller B'
 
-# midiout = rtmidi.MidiOut()
 available_ports = mido.get_output_names()
 
 def signal_handler(signal, frame):

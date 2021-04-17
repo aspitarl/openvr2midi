@@ -15,10 +15,39 @@ v = triad_openvr.triad_openvr()
 v.print_discovered_objects()
 
 
+#Indicate what controller belongs to which hand...Must be a more elegant way...
+present_controllers = [key for key in v.devices if 'controller' in key]
+
+models = {controller: v.devices[controller].get_model() for controller in present_controllers}
+
+present_controllers = {}
+for controller in models.keys():
+    if 'Left' in models[controller]:
+        present_controllers['left'] = controller
+    elif 'Right' in models[controller]:
+        present_controllers['right'] = controller
+
+print("Controller hand associations: ")
+print(present_controllers)
+
+
+#Argument 1: left or right, default to controller_1...
+#Argument 2: midi port name
+
+default_midi_ports = {
+    'right' : 'Right Controller',
+    'left' : 'Left Controller'
+}
+
+#TODO use better argument handling library
+
 if len(sys.argv) == 1:
-    controller_name = "controller_1"
+    hand = 'right' 
 elif len(sys.argv) == 2:
-    controller_name = "controller_" + str(sys.argv[1])
+    hand = sys.argv[1]
+
+controller_name = present_controllers[hand]  
+midiportname = default_midi_ports[hand]
 
 print("connecting to " + controller_name)
 contr = v.devices[controller_name]
@@ -33,8 +62,6 @@ if controller_name == "controller_1":
     'tpy':25,
 }
 
-    # midiportname = 'rtpMIDI-Laptop'
-    midiportname = 'Controller A'
 
 elif controller_name == "controller_2":
     cc_dict = {
@@ -44,7 +71,6 @@ elif controller_name == "controller_2":
     'tpy':25,
 }
 
-    midiportname = 'Controller B'
 
 available_ports = mido.get_output_names()
 

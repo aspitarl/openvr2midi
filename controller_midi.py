@@ -2,8 +2,22 @@ from triad_openvr import triad_openvr
 import time
 import sys
 import mido
+from pythonosc import udp_client
+import random
+import argparse
 import os
 import signal
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
+    help="Which controller")
+parser.add_argument("--no-osc", action="store_false",
+    help="Don't send osc messages")
+parser.add_argument("--ip", default="127.0.0.1",
+    help="The ip of the OSC server")
+parser.add_argument("--port", type=int, default=10000,
+    help="The port the OSC server is listening on")
+args = parser.parse_args()
 
 # from rtmidi.midiconstants import CONTROL_CHANGE, PITCH_BEND
 
@@ -41,13 +55,9 @@ default_midi_ports = {
 
 #TODO use better argument handling library
 
-if len(sys.argv) == 1:
-    hand = 'right' 
-elif len(sys.argv) == 2:
-    hand = sys.argv[1]
 
-controller_name = present_controllers[hand]  
-midiportname = default_midi_ports[hand]
+controller_name = present_controllers[args.hand]  
+midiportname = default_midi_ports[args.hand]
 
 print("connecting to " + controller_name)
 contr = v.devices[controller_name]
@@ -96,6 +106,11 @@ for i, port in enumerate(available_ports):
 if not midi_connected:
     print('Could not find port ' + midiportname + ' in following midi ports')
     print(available_ports)
+
+if args.no_osc:
+    osc_client = None
+else:
+    osc_client = udp_client.SimpleUDPClient(args.ip, args.port)
 
 cube_ranges = {
     'x': {'min': 0.7, 'max': 1.3},
@@ -244,6 +259,11 @@ while(running):
                 midiout.send(ccy)                  
                 ccz = mido.Message('control_change',control=cc_dict['z'], value=data_scaled['z'])
                 midiout.send(ccz)  
+
+                if osc_client != None:
+                    osc_client.send_message("/x", data_scaled['x']/127)
+                    osc_client.send_message("/y", data_scaled['y']/127)
+                    osc_client.send_message("/z", data_scaled['z']/127)
 
                 if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
                 if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)

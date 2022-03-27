@@ -1,3 +1,4 @@
+from asyncore import loop
 from triad_openvr import triad_openvr
 import time
 import sys
@@ -12,6 +13,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
     help="Which controller")
 parser.add_argument("--no-osc", action="store_false",
+    help="Don't send osc messages")
+parser.add_argument("--no-haptic", action="store_false",
     help="Don't send osc messages")
 parser.add_argument("--ip", default="127.0.0.1",
     help="The ip of the OSC server")
@@ -225,7 +228,12 @@ debug = False
 running = True
 
 trackpad_reset = False #used to reset pitchbend after letting go of touchpad
+
+
+#Going to reset this each time haptic feedback is sent...so do want to call it a general loop counter
+haptic_loop_counter = 0
 while(running):
+    haptic_loop_counter += 1
     start = time.time()
 
     inputs, pose = get_inputs_and_pose(contr)
@@ -233,7 +241,7 @@ while(running):
     if debug: 
         debugstr = 'Controller: ' + controller_name + '\nMidi Port Name: ' + midiportname + '\nInputs ' + str(inputs)
 
-    if inputs['button'] == rangesetbutton:
+    if inputs['button'] == rangesetbutton and pose != None:
         #enter range set mode
         cube_ranges = range_set_mode(contr)
     else:
@@ -260,6 +268,7 @@ while(running):
                 ccz = mido.Message('control_change',control=cc_dict['z'], value=data_scaled['z'])
                 midiout.send(ccz)  
 
+
                 if osc_client != None:
                     osc_client.send_message("/x", data_scaled['x']/127)
                     osc_client.send_message("/y", data_scaled['y']/127)
@@ -268,6 +277,17 @@ while(running):
                 if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
                 if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)
                 if debug: debugstr = debugstr + '\nCCz Message: ' + str(ccz)
+
+                scaled_y = data_scaled['y']
+
+                if args.no_haptic:
+                    if (scaled_y > 10):
+                        if haptic_loop_counter > 10:
+                            contr.trigger_haptic_pulse(duration_micros=scaled_y*10)
+                            haptic_loop_counter = 0
+
+
+
 
             ### Not sure exactly how pitchbend works in mido, use 'pitch wheel'?
 

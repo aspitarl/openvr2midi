@@ -3,8 +3,13 @@ import sys
 import os
 import argparse
 
+config_folders_path = r'VR Config Shortcuts'
+choices = [f for f in os.listdir(config_folders_path) if os.path.isdir(os.path.join(config_folders_path,f))]
+
+print(choices)
+
 parser = argparse.ArgumentParser()
-parser.add_argument("option", type=str, default='normal', choices=['normal','seated','no_hmd'], 
+parser.add_argument("option", type=str, default='normal', choices=choices, 
     help="Which controller")
 
 
@@ -12,7 +17,6 @@ option = parser.parse_args().option
 
 print("Switching to option: {}".format(option))
 
-config_folders_path = r'VR Config Shortcuts'
 
 steamvr_settings_out = r'C:\Program Files (x86)\Steam\config\steamvr.vrsettings'
 null_driver_out = r'C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\null\resources\settings\default.vrsettings'

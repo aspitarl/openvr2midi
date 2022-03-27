@@ -16,6 +16,8 @@ parser.add_argument("--no-osc", action="store_false",
     help="Don't send osc messages")
 parser.add_argument("--no-haptic", action="store_false",
     help="Don't send osc messages")
+parser.add_argument("--debug", action="store_true",
+    help="Don't send osc messages")
 parser.add_argument("--ip", default="127.0.0.1",
     help="The ip of the OSC server")
 parser.add_argument("--port", type=int, default=10000,
@@ -224,7 +226,7 @@ def get_inputs_and_pose(contr):
 
     return inputs, pose
 
-debug = False
+debug = args.debug
 running = True
 
 trackpad_reset = False #used to reset pitchbend after letting go of touchpad
@@ -239,18 +241,23 @@ while(running):
     inputs, pose = get_inputs_and_pose(contr)
 
     if debug: 
-        debugstr = 'Controller: ' + controller_name + '\nMidi Port Name: ' + midiportname + '\nInputs ' + str(inputs)
+        debugstr = 'Controller: ' + controller_name + '\nMidi Port Name: ' + midiportname# + '\nInputs ' + str(inputs)
 
     if inputs['button'] == rangesetbutton and pose != None:
         #enter range set mode
         cube_ranges = range_set_mode(contr)
     else:
         #normal mode
-        if debug: debugstr = debugstr + '\nNormal Mode:'
-        if debug: debugstr = debugstr + '\nPose: ' + str(pose)
+        if debug:
+            debugstr = debugstr + '\nNormal Mode:'
+
         trigger = inputs['trigger']
         
         if pose is not None:   
+            if debug:
+                pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
+                debugstr = debugstr + '\nPose: ' + str(pose_debug)
+                
             for dim in pose:
                 if (dim == 'y') and (trigger == 1):
                     data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=True)

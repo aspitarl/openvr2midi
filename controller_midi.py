@@ -229,6 +229,7 @@ def get_inputs_and_pose(contr):
 debug = args.debug
 running = True
 
+save_range_dict = False #Save range dict when exiting range set mode
 trackpad_reset = False #used to reset pitchbend after letting go of touchpad
 
 
@@ -246,10 +247,15 @@ while(running):
     if inputs['button'] == rangesetbutton and pose != None:
         #enter range set mode
         cube_ranges = range_set_mode(contr)
+        save_range_dict = True
     else:
         #normal mode
         if debug:
             debugstr = debugstr + '\nNormal Mode:'
+        if save_range_dict:
+            with open('ranges_dict.json', 'w') as f:
+                json.dump(cube_ranges, f)
+            save_range_dict = False
 
         trigger = inputs['trigger']
         

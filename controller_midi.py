@@ -117,11 +117,11 @@ if args.no_osc:
 else:
     osc_client = udp_client.SimpleUDPClient(args.ip, args.port)
 
-cube_ranges = {
-    'x': {'min': 0.7, 'max': 1.3},
-    'y': {'min': 0.7, 'max': 1.3},
-    'z': {'min': 0.7, 'max': 1.3}
-}
+import json
+with open('ranges_dict.json', 'r') as f:
+    cube_ranges = json.load(f)
+
+
 
 outscale = 127
 
@@ -257,7 +257,7 @@ while(running):
             if debug:
                 pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
                 debugstr = debugstr + '\nPose: ' + str(pose_debug)
-                
+
             for dim in pose:
                 if (dim == 'y') and (trigger == 1):
                     data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=True)

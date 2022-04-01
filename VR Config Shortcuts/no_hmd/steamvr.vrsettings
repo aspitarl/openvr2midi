@@ -1,0 +1,135 @@
+{
+   "DesktopUI" : {
+      "pairing" : "568,271,800,600,0",
+      "settings_desktop" : "592,364,800,600,0"
+   },
+   "GpuSpeed" : {
+      "gpuSpeed0" : 501,
+      "gpuSpeed1" : 502,
+      "gpuSpeed2" : 501,
+      "gpuSpeed3" : 502,
+      "gpuSpeedCount" : 4,
+      "gpuSpeedDriver" : "26.21.14.4166",
+      "gpuSpeedHorsepower" : 501,
+      "gpuSpeedRenderTargetScale" : 1.1000000238418579,
+      "gpuSpeedVendor" : "NVIDIA GeForce GTX 1070",
+      "gpuSpeedVersion" : 2
+   },
+   "LastKnown" : {
+      "HMDModel" : "Null Model Number"
+   },
+   "audio" : {
+      "offPlaybackDevice" : "",
+      "offRecordDevice" : "",
+      "onPlaybackDevice" : "",
+      "onRecordDevice" : "",
+      "viveHDMIGain" : true
+   },
+   "camera" : {
+      "cameraBoundsColorGammaA" : 153,
+      "cameraBoundsColorGammaB" : 255,
+      "cameraBoundsColorGammaG" : 255,
+      "cameraBoundsColorGammaR" : 0,
+      "cameraBoundsStrength" : 78,
+      "enableCamera" : false,
+      "enableCameraForCollisionBounds" : false,
+      "enableCameraForRoomView" : false,
+      "enableCameraInDashboard" : false
+   },
+   "collisionBounds" : {
+      "CollisionBoundsCenterMarkerOn" : false,
+      "CollisionBoundsColorGammaA" : 153,
+      "CollisionBoundsColorGammaB" : 255,
+      "CollisionBoundsColorGammaG" : 255,
+      "CollisionBoundsColorGammaR" : 0,
+      "CollisionBoundsFadeDistance" : 0.69999999999999996,
+      "CollisionBoundsGroundPerimeterOn" : false,
+      "CollisionBoundsPlaySpaceOn" : false,
+      "CollisionBoundsStyle" : 0
+   },
+   "dashboard" : {
+      "arcadeMode" : false,
+      "enableDashboard" : true
+   },
+   "keyboard" : {
+      "OffsetLeftX" : 0,
+      "OffsetRightX" : 0,
+      "OffsetY" : 0,
+      "ScaleX" : 1.1000000000000001,
+      "ScaleY" : 1.1000000000000001,
+      "Smoothing" : false,
+      "TutorialCompletions" : 0
+   },
+   "notifications" : {
+      "DoNotDisturb" : false
+   },
+   "perfcheck" : {
+      "allowTimingStore" : false,
+      "heuristicActive" : true,
+      "perfTestData" : 0,
+      "saveTimingsOnExit" : false,
+      "warnInHMD" : false,
+      "warnOnlyOnce" : false
+   },
+   "power" : {
+      "autoLaunchSteamVROnButtonPress" : true,
+      "powerOffOnExit" : true,
+      "returnToWatchdogTimeout" : 0,
+      "turnOffControllersTimeout" : 300,
+      "turnOffScreensTimeout" : 5
+   },
+   "steamvr" : {
+      "CycleBackgroundImageTimeSec" : -1,
+      "activateMultipleDrivers" : true,
+      "allowAsyncReprojection" : true,
+      "allowInterleavedReprojection" : true,
+      "background" : "",
+      "backgroundCameraHeight" : 1.6000000000000001,
+      "backgroundDomeRadius" : 0,
+      "backgroundUseDomeProjection" : false,
+      "basestationPowerManagement" : 0,
+      "debugProcessPipe" : "",
+      "defaultMirrorView" : 0,
+      "directMode" : true,
+      "displayDebug" : false,
+      "displayDebugX" : 0,
+      "displayDebugY" : 0,
+      "enableDistortion" : true,
+      "enableHomeApp" : false,
+      "environment" : "",
+      "forceFadeOnBadTracking" : true,
+      "forceReprojection" : false,
+      "forcedDriver" : "null",
+      "forcedHmd" : "",
+      "gridColor" : "",
+      "installID" : "1352301942902655834",
+      "ipd" : 0.063,
+      "ipdOffset" : 0,
+      "lastVersionNotice" : "1.10.32",
+      "lastVersionNoticeDate" : "1584997241",
+      "loglevel" : 3,
+      "neverKillProcesses" : false,
+      "panelMask" : true,
+      "panelMaskVignette" : true,
+      "panelMaskVignetteWidth" : 2,
+      "playAreaColor" : "",
+      "renderTargetMultiplier" : 1,
+      "requireHmd" : false,
+      "retailDemo" : false,
+      "sendSystemButtonToAllApps" : false,
+      "setInitialDefaultHomeApp" : false,
+      "showMirrorView" : false,
+      "showStage" : false,
+      "speakersForwardYawOffsetDegrees" : 0,
+      "startCompositorFromAppLaunch" : true,
+      "startDashboardFromAppLaunch" : true,
+      "startMonitorFromAppLaunch" : true,
+      "startOverlayAppsFromDashboard" : true,
+      "usingSpeakers" : false
+   },
+   "userinterface" : {
+      "StatusAlwaysOnTop" : true,
+      "screenshotType" : 2,
+      "screenshots" : true
+   }
+}

@@ -1,0 +1,81 @@
+{
+   "DesktopUI" : {
+      "pairing" : "568,271,800,600,0",
+      "settings_desktop" : "1112,432,800,600,0"
+   },
+   "DismissedWarnings" : {
+      "DismissableWarning_UnknownHardwareDetected" : true,
+      "DismissableWarning_WiredIndexControllerActivity_96022380_LastDismissedTime" : "1642555070"
+   },
+   "GpuSpeed" : {
+      "gpuSpeed0" : 542,
+      "gpuSpeed1" : 541,
+      "gpuSpeed2" : 556,
+      "gpuSpeed3" : 556,
+      "gpuSpeed4" : 540,
+      "gpuSpeed5" : 541,
+      "gpuSpeed6" : 535,
+      "gpuSpeed7" : 535,
+      "gpuSpeed8" : 535,
+      "gpuSpeed9" : 549,
+      "gpuSpeedCount" : 10,
+      "gpuSpeedDriver" : "30.0.14.9613",
+      "gpuSpeedHorsepower" : 541,
+      "gpuSpeedRenderTargetScale" : 0.87999999523162842,
+      "gpuSpeedVendor" : "NVIDIA GeForce GTX 1070",
+      "gpuSpeedVersion" : 2
+   },
+   "LastKnown" : {
+      "HMDManufacturer" : "Valve",
+      "HMDModel" : "Index"
+   },
+   "audio" : {
+      "enablePlaybackDeviceOverride_Valve_Index" : false,
+      "enablePlaybackMirrorIndependentVolume" : true,
+      "enableRecordingDeviceOverride_Valve_Index" : false,
+      "lastHmdPlaybackDeviceId_Valve_Index" : "{0.0.0.00000000}.{e9cb34f1-5607-4879-ae17-403bd3a137df}",
+      "playbackDeviceOverrideName_Valve_Index" : "Index HMD (2- NVIDIA High Definition Audio)",
+      "playbackDeviceOverride_Valve_Index" : "{0.0.0.00000000}.{bc687b5f-dc7f-4900-b409-d70ca64812ff}",
+      "playbackMirrorDevice" : "{0.0.0.00000000}.{1f9ba5b4-ebd3-410b-8b91-1ccf5c6dd971}",
+      "playbackMirrorDeviceName" : "Realtek Digital Output (Realtek(R) Audio)",
+      "recordingDeviceOverrideName_Valve_Index" : "",
+      "recordingDeviceOverride_Valve_Index" : ""
+   },
+   "camera" : {
+      "showOnController" : true
+   },
+   "collisionBounds" : {
+      "CollisionBoundsFadeDistance" : 0.43988923758537934,
+      "CollisionBoundsStyle" : 3
+   },
+   "dashboard" : {
+      "lastAccessedExternalOverlayKey" : "myou.nalo"
+   },
+   "driver_lighthouse" : {
+      "PowerManagedBaseStations2" : "LHB-EEF8AB27:BS2:1,LHB-2A91900A:BS2:1"
+   },
+   "steam.app.1533390" : {
+      "motionSmoothingOverride" : 0
+   },
+   "steam.app.244210" : {
+      "knuckles_250820_CurrentURL_legacy" : "vr-input-workshop://2059636978"
+   },
+   "steam.app.611670" : {
+      "knuckles_250820_CurrentURL_legacy" : "vr-input-workshop://1956531378",
+      "knuckles_250820_PreviousURL_legacy" : "vr-input-workshop://2479522471"
+   },
+   "steam.app.629730" : {
+      "motionSmoothingOverride" : 0
+   },
+   "steam.app.804490" : {
+      "knuckles_250820_PreviousURL_legacy" : "vr-input-workshop://1784852994"
+   },
+   "steamvr" : {
+      "activateMultipleDrivers" : true,
+      "installID" : "13676170796465181942",
+      "lastVersionNotice" : "1.20.4",
+      "lastVersionNoticeDate" : "1634679606",
+      "showAdvancedSettings" : true,
+      "showMirrorView" : true
+   }
+}

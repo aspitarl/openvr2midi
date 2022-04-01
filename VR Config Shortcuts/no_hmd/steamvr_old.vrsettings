@@ -1,0 +1,45 @@
+{
+   "DesktopUI" : {
+      "pairing" : "568,271,800,600,0",
+      "settings_desktop" : "1112,432,800,600,0"
+   },
+   "GpuSpeed" : {
+      "gpuSpeed0" : 502,
+      "gpuSpeed1" : 503,
+      "gpuSpeed2" : 497,
+      "gpuSpeed3" : 502,
+      "gpuSpeed4" : 502,
+      "gpuSpeed5" : 502,
+      "gpuSpeed6" : 502,
+      "gpuSpeed7" : 502,
+      "gpuSpeed8" : 502,
+      "gpuSpeed9" : 502,
+      "gpuSpeedCount" : 10,
+      "gpuSpeedDriver" : "26.21.14.4166",
+      "gpuSpeedHorsepower" : 502,
+      "gpuSpeedRenderTargetScale" : 1.1000000238418579,
+      "gpuSpeedVendor" : "NVIDIA GeForce GTX 1070",
+      "gpuSpeedVersion" : 2
+   },
+   "LastKnown" : {
+      "HMDManufacturer" : "Valve",
+      "HMDModel" : "Null Model Number"
+   },
+   "audio" : {
+      "lastHmdPlaybackDeviceId_Valve_Index" : "{0.0.0.00000000}.{bc687b5f-dc7f-4900-b409-d70ca64812ff}"
+   },
+   "driver_lighthouse" : {
+      "PowerManagedBaseStations2" : "LHB-2A91900A:BS2:1,LHB-EEF8AB27:BS2:1"
+   },
+   "steamvr" : {
+      "activateMultipleDrivers" : true,
+      "enableHomeApp" : false,
+      "forcedDriver" : "null",
+      "installID" : "2374714397989385407",
+      "lastVersionNotice" : "1.10.28",
+      "lastVersionNoticeDate" : "1584135086",
+      "requireHmd" : false,
+      "showAdvancedSettings" : true,
+      "showMirrorView" : false
+   }
+}

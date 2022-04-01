@@ -1,0 +1,64 @@
+{
+   "DesktopUI" : {
+      "pairing" : "568,271,800,600,0",
+      "settings_desktop" : "952,432,800,600,0"
+   },
+   "GpuSpeed" : {
+      "gpuSpeed0" : 587,
+      "gpuSpeed1" : 545,
+      "gpuSpeed2" : 587,
+      "gpuSpeed3" : 542,
+      "gpuSpeed4" : 576,
+      "gpuSpeed5" : 586,
+      "gpuSpeed6" : 542,
+      "gpuSpeed7" : 542,
+      "gpuSpeed8" : 543,
+      "gpuSpeed9" : 545,
+      "gpuSpeedCount" : 10,
+      "gpuSpeedDriver" : "27.21.14.5671",
+      "gpuSpeedHorsepower" : 556,
+      "gpuSpeedRenderTargetScale" : 0.91999995708465576,
+      "gpuSpeedVendor" : "NVIDIA GeForce GTX 1070",
+      "gpuSpeedVersion" : 2
+   },
+   "LastKnown" : {
+      "HMDManufacturer" : "Valve",
+      "HMDModel" : "Index"
+   },
+   "audio" : {
+      "activePlaybackMirrorDevice" : "{0.0.0.00000000}.{1f9ba5b4-ebd3-410b-8b91-1ccf5c6dd971}",
+      "enablePlaybackDeviceOverride_Valve_Index" : false,
+      "enablePlaybackMirror" : true,
+      "enablePlaybackMirrorIndependentVolume" : true,
+      "enableRecordingDeviceOverride_Valve_Index" : false,
+      "lastHmdPlaybackDeviceId_Valve_Index" : "{0.0.0.00000000}.{526c6a24-aa1c-4a37-9b68-486316160866}",
+      "playbackDeviceOverrideName_Valve_Index" : "Index HMD (2- NVIDIA High Definition Audio)",
+      "playbackDeviceOverride_Valve_Index" : "{0.0.0.00000000}.{bc687b5f-dc7f-4900-b409-d70ca64812ff}",
+      "playbackMirrorDevice" : "{0.0.0.00000000}.{1f9ba5b4-ebd3-410b-8b91-1ccf5c6dd971}",
+      "playbackMirrorDeviceName" : "Realtek Digital Output (Realtek(R) Audio)",
+      "recordingDeviceOverrideName_Valve_Index" : "",
+      "recordingDeviceOverride_Valve_Index" : ""
+   },
+   "collisionBounds" : {
+      "CollisionBoundsFadeDistance" : 0.43988923758537934,
+      "CollisionBoundsStyle" : 3
+   },
+   "driver_lighthouse" : {
+      "PowerManagedBaseStations2" : "LHB-EEF8AB27:BS2:1,LHB-2A91900A:BS2:1"
+   },
+   "steam.app.1533390" : {
+      "motionSmoothingOverride" : 0
+   },
+   "steam.app.244210" : {
+      "knuckles_250820_CurrentURL_legacy" : "vr-input-workshop://2059636978"
+   },
+   "steam.app.804490" : {
+      "knuckles_250820_PreviousURL_legacy" : "vr-input-workshop://1784852994"
+   },
+   "steamvr" : {
+      "installID" : "13676170796465181942",
+      "lastVersionNotice" : "1.16.10",
+      "lastVersionNoticeDate" : "1615842605",
+      "showMirrorView" : false
+   }
+}

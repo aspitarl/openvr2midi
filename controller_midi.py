@@ -8,6 +8,7 @@ import random
 import argparse
 import os
 import signal
+from curve_function_graphs import curve_quad
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
@@ -157,8 +158,11 @@ def scale_data(data_raw, cube_ranges, dim, half):
     elif scaled > outscale:
         scaled = outscale
 
+    scaled = curve_quad(scaled, 1)
+
     #Added for conversion to mido, believe rtmidi was converting inside api
     scaled = int(scaled)
+
 
     return scaled
 

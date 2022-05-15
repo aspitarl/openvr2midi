@@ -9,6 +9,8 @@ import argparse
 import os
 import signal
 from curve_function_graphs import curve_quad
+import numpy as np
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
@@ -297,10 +299,13 @@ while(running):
 
                 scaled_y = data_scaled['y']
 
+
+                haptic_threshold = 40
                 if args.no_haptic:
-                    if (scaled_y > 10):
-                        if haptic_loop_counter > 10:
-                            contr.trigger_haptic_pulse(duration_micros=scaled_y*10)
+                    if haptic_loop_counter > 10:
+                        if (scaled_y > haptic_threshold):
+                            scaled_y_vib = int(scaled_y-haptic_threshold)*30
+                            contr.trigger_haptic_pulse(duration_micros=scaled_y_vib)
                             haptic_loop_counter = 0
 
 

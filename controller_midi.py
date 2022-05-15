@@ -119,7 +119,7 @@ else:
     osc_client = udp_client.SimpleUDPClient(args.ip, args.port)
 
 import json
-with open('ranges_dict.json', 'r') as f:
+with open('ranges_dict_{}.json'.format(args.hand), 'r') as f:
     cube_ranges = json.load(f)
 
 
@@ -257,7 +257,7 @@ while(running):
         if debug:
             debugstr = debugstr + '\nNormal Mode:'
         if save_range_dict:
-            with open('ranges_dict.json', 'w') as f:
+            with open('ranges_dict_{}.json'.format(args.hand), 'w') as f:
                 json.dump(cube_ranges, f)
             save_range_dict = False
 

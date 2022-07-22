@@ -1,3 +1,4 @@
 # VR\ Config\ Shortcuts
 workspace.code*
 .vscode
+*.pyc

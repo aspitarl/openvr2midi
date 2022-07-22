@@ -11,6 +11,7 @@ import signal
 from curve_function_graphs import curve_quad
 import numpy as np
 
+MIDI_CC_MAX = 127
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
@@ -124,14 +125,18 @@ import json
 with open('ranges_dict_{}.json'.format(args.hand), 'r') as f:
     cube_ranges = json.load(f)
 
+#This is for flipping the axes along an axis. currently done during pose retrival TODO: More elegant way?
+direction_dict = {
+    'x': -1.0,
+    'y': 1.0,
+    'z': 1.0
+}
 
-
-outscale = 127
 
 data_scaled = {
-    'x': outscale/2,
-    'y': outscale/2,
-    'z': outscale/2
+    'x': MIDI_CC_MAX/2,
+    'y': MIDI_CC_MAX/2,
+    'z': MIDI_CC_MAX/2
 }
 
 rangesetbutton = 'b'
@@ -151,14 +156,14 @@ def scale_data(data_raw, cube_ranges, dim, half):
         elif relative_dist > halflength:
             relative_dist = length - relative_dist
 
-        scaled = (relative_dist/halflength)*outscale  
+        scaled = (relative_dist/halflength)*MIDI_CC_MAX  
     else:  
-        scaled = (relative_dist/length)*outscale
+        scaled = (relative_dist/length)*MIDI_CC_MAX
 
     if scaled < 0:
         scaled = 0
-    elif scaled > outscale:
-        scaled = outscale
+    elif scaled > MIDI_CC_MAX:
+        scaled = MIDI_CC_MAX
 
     scaled = curve_quad(scaled, 1)
 
@@ -219,6 +224,7 @@ def get_inputs_and_pose(contr):
             'z': positionarray[2]
             }
 
+    pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}
     #Inputs
     inputs = contr.get_controller_inputs()
 

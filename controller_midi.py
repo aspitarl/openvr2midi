@@ -16,7 +16,7 @@ MIDI_CC_MAX = 127
 parser = argparse.ArgumentParser()
 parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 
     help="Which controller")
-parser.add_argument("--no-osc", action="store_false",
+parser.add_argument("--send-osc", action="store_true",
     help="Don't send osc messages")
 parser.add_argument("--no-haptic", action="store_false",
     help="Don't send osc messages")
@@ -116,10 +116,11 @@ if not midi_connected:
     print('Could not find port ' + midiportname + ' in following midi ports')
     print(available_ports)
 
-if args.no_osc:
-    osc_client = None
-else:
+if args.send_osc:
+    print("Sending osc messages to IP: {} over port {}".format(args.ip, args.port))
     osc_client = udp_client.SimpleUDPClient(args.ip, args.port)
+else:
+    osc_client = None
 
 import json
 with open('ranges_dict_{}.json'.format(args.hand), 'r') as f:
@@ -224,7 +225,7 @@ def get_inputs_and_pose(contr):
             'z': positionarray[2]
             }
 
-    pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}
+        pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}
     #Inputs
     inputs = contr.get_controller_inputs()
 
@@ -295,9 +296,9 @@ while(running):
 
 
                 if osc_client != None:
-                    osc_client.send_message("/x", data_scaled['x']/127)
-                    osc_client.send_message("/y", data_scaled['y']/127)
-                    osc_client.send_message("/z", data_scaled['z']/127)
+                    osc_client.send_message("/{}/x".format(args.hand), data_scaled['x']/127)
+                    osc_client.send_message("/{}/y".format(args.hand), data_scaled['y']/127)
+                    osc_client.send_message("/{}/z".format(args.hand), data_scaled['z']/127)
 
                 if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
                 if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)

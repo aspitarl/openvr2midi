@@ -19,9 +19,9 @@ parser.add_argument("--hand", type=str, default='right', choices=['right','left'
 parser.add_argument("--send-osc", action="store_true",
     help="Don't send osc messages")
 parser.add_argument("--no-haptic", action="store_false",
-    help="Don't send osc messages")
+    help="disable haptic feedback")
 parser.add_argument("--debug", action="store_true",
-    help="Don't send osc messages")
+    help="enable debug mode")
 parser.add_argument("--ip", default="127.0.0.1",
     help="The ip of the OSC server")
 parser.add_argument("--port", type=int, default=10000,
@@ -128,7 +128,7 @@ with open('ranges_dict_{}.json'.format(args.hand), 'r') as f:
 
 #This is for flipping the axes along an axis. currently done during pose retrival TODO: More elegant way?
 direction_dict = {
-    'x': -1.0,
+    'x': 1.0,
     'y': 1.0,
     'z': 1.0
 }

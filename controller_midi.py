@@ -77,8 +77,11 @@ cc_dict = {
     'x': 22,
     'y': 23,
     'z': 24,
-    'trigger':25,
-    'tpy':26,
+    'yaw': 25,
+    'pitch': 26,
+    'roll': 27,
+    'trigger':28,
+    # 'tpy':26,
 }
 
 
@@ -121,15 +124,13 @@ with open('ranges_dict_{}.json'.format(args.hand), 'r') as f:
 direction_dict = {
     'x': 1.0,
     'y': 1.0,
-    'z': 1.0
+    'z': 1.0,
+    'yaw': 1.0,
+    'pitch': 1.0,
+    'roll': 1.0,
 }
 
 
-data_scaled = {
-    'x': MIDI_CC_MAX/2,
-    'y': MIDI_CC_MAX/2,
-    'z': MIDI_CC_MAX/2
-}
 
 rangesetbutton = 'b'
 senddatabutton = 'a'
@@ -172,7 +173,10 @@ def range_set_mode(contr, debugstr=''):
     cube_ranges = {
         'x': {'min': pose['x'], 'max': pose['x']},
         'y': {'min': pose['y'], 'max': pose['y']},
-        'z': {'min': pose['z'], 'max': pose['z']}
+        'z': {'min': pose['z'], 'max': pose['z']},
+        'yaw': {'min': pose['yaw'], 'max': pose['yaw']},
+        'pitch': {'min': pose['pitch'], 'max': pose['pitch']},
+        'roll': {'min': pose['roll'], 'max': pose['roll']}
     }      
 
     while(inputs['button'] == rangesetbutton):
@@ -213,7 +217,10 @@ def get_inputs_and_pose(contr):
         pose = {
             'x': positionarray[0],
             'y': positionarray[1],
-            'z': positionarray[2]
+            'z': positionarray[2],
+            'yaw': positionarray[3],
+            'pitch': positionarray[4],
+            'roll': positionarray[5]
             }
 
         pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}
@@ -265,15 +272,15 @@ while(running):
         
         if pose is not None:   
             if inputs['button'] == senddatabutton or inputs['trackpad_touched']:
-            if debug:
-                pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
-                debugstr = debugstr + '\nPose: ' + str(pose_debug)
+                if debug:
+                    pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
+                    debugstr = debugstr + '\nPose: ' + str(pose_debug)
 
                 for dim in cc_dict:
 
                     if dim == 'trigger':
                         data_scaled = int(trigger)*MIDI_CC_MAX
-                else: 
+                    else:
                         half_mode = True if (dim == 'y') and (trigger == 1) and (args.trigger_half) else False
                         data_scaled = scale_data(pose, cube_ranges, dim, half=half_mode)
 
@@ -281,17 +288,17 @@ while(running):
                     midiout.send(cc)            
                     if debug: debugstr = debugstr + '\n{} CC Message: {}'.format(dim, cc)
 
-                if osc_client != None:
+                    if osc_client != None:
                         osc_client.send_message("/{}/{}".format(args.hand, dim), data_scaled/127)
 
                     if dim == 'y':
-                haptic_threshold = 40
-                if args.no_haptic:
-                    if haptic_loop_counter > 10:
+                        haptic_threshold = 40
+                        if args.no_haptic:
+                            if haptic_loop_counter > 10:
                                 if (data_scaled > haptic_threshold):
                                     scaled_y_vib = int(data_scaled-haptic_threshold)*30
-                            contr.trigger_haptic_pulse(duration_micros=scaled_y_vib)
-                            haptic_loop_counter = 0
+                                    contr.trigger_haptic_pulse(duration_micros=scaled_y_vib)
+                                    haptic_loop_counter = 0
 
 
                     # if debug: debugstr = debugstr + '\nScaled Pose for {}: {}'.format(dim, data_scaled)

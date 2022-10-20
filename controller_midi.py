@@ -18,6 +18,8 @@ parser.add_argument("--hand", type=str, default='right', choices=['right','left'
     help="Which controller")
 parser.add_argument("--send-osc", action="store_true",
     help="Don't send osc messages")
+parser.add_argument("--trigger-half", action="store_true",
+    help="Enables trigger to go into half mode")
 parser.add_argument("--no-haptic", action="store_false",
     help="disable haptic feedback")
 parser.add_argument("--debug", action="store_true",
@@ -62,32 +64,20 @@ default_midi_ports = {
     'left' : 'Left Controller'
 }
 
-#TODO use better argument handling library
-
-
 controller_name = present_controllers[args.hand]  
 midiportname = default_midi_ports[args.hand]
 
 print("connecting to " + controller_name)
 contr = v.devices[controller_name]
 
-#TODO: Figure out whether these dicts should be same or different (stress test 1 midi channel...)
+#TODO: Figure out whether there should be different cc dicts for each controller (stress test 1 midi channel...)
 
-if controller_name == "controller_1":
-    cc_dict = {
+cc_dict = {
     'x': 22,
     'y': 23,
     'z': 24,
-    'tpy':25,
-}
-
-
-elif controller_name == "controller_2":
-    cc_dict = {
-    'x': 22,
-    'y': 23,
-    'z': 24,
-    'tpy':25,
+    'trigger':25,
+    'tpy':26,
 }
 
 
@@ -278,7 +268,7 @@ while(running):
                 debugstr = debugstr + '\nPose: ' + str(pose_debug)
 
             for dim in pose:
-                if (dim == 'y') and (trigger == 1):
+                if (dim == 'y') and (trigger == 1) and (args.trigger_half):
                     data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=True)
                 else: 
                     data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=False)
@@ -293,12 +283,15 @@ while(running):
                 midiout.send(ccy)                  
                 ccz = mido.Message('control_change',control=cc_dict['z'], value=data_scaled['z'])
                 midiout.send(ccz)  
+                cc_trig = mido.Message('control_change',control=cc_dict['trigger'], value=int(trigger)*MIDI_CC_MAX)
+                midiout.send(cc_trig)
 
 
                 if osc_client != None:
                     osc_client.send_message("/{}/x".format(args.hand), data_scaled['x']/127)
                     osc_client.send_message("/{}/y".format(args.hand), data_scaled['y']/127)
                     osc_client.send_message("/{}/z".format(args.hand), data_scaled['z']/127)
+                    osc_client.send_message("/{}/trigger".format(args.hand), int(trigger))
 
                 if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
                 if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)

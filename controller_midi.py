@@ -72,6 +72,7 @@ contr = v.devices[controller_name]
 
 #TODO: Figure out whether there should be different cc dicts for each controller (stress test 1 midi channel...)
 
+# Define CC channels to send, comment out to not send
 cc_dict = {
     'x': 22,
     'y': 23,
@@ -263,51 +264,37 @@ while(running):
         trigger = inputs['trigger']
         
         if pose is not None:   
+            if inputs['button'] == senddatabutton or inputs['trackpad_touched']:
             if debug:
                 pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
                 debugstr = debugstr + '\nPose: ' + str(pose_debug)
 
-            for dim in pose:
-                if (dim == 'y') and (trigger == 1) and (args.trigger_half):
-                    data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=True)
+                for dim in cc_dict:
+
+                    if dim == 'trigger':
+                        data_scaled = int(trigger)*MIDI_CC_MAX
                 else: 
-                    data_scaled[dim] = scale_data(pose, cube_ranges, dim, half=False)
+                        half_mode = True if (dim == 'y') and (trigger == 1) and (args.trigger_half) else False
+                        data_scaled = scale_data(pose, cube_ranges, dim, half=half_mode)
 
-            if debug: debugstr = debugstr + '\nScaled Pose: ' + str(data_scaled)
-
-            if inputs['button'] == senddatabutton or inputs['trackpad_touched']:
-                ccx = mido.Message('control_change',control=cc_dict['x'], value=data_scaled['x'])
-                # ccx = [CONTROL_CHANGE, cc_dict['x'], data_scaled['x']]
-                midiout.send(ccx)            
-                ccy = mido.Message('control_change',control=cc_dict['y'], value=data_scaled['y'])
-                midiout.send(ccy)                  
-                ccz = mido.Message('control_change',control=cc_dict['z'], value=data_scaled['z'])
-                midiout.send(ccz)  
-                cc_trig = mido.Message('control_change',control=cc_dict['trigger'], value=int(trigger)*MIDI_CC_MAX)
-                midiout.send(cc_trig)
-
+                    cc = mido.Message('control_change',control=cc_dict[dim], value=data_scaled)
+                    midiout.send(cc)            
+                    if debug: debugstr = debugstr + '\n{} CC Message: {}'.format(dim, cc)
 
                 if osc_client != None:
-                    osc_client.send_message("/{}/x".format(args.hand), data_scaled['x']/127)
-                    osc_client.send_message("/{}/y".format(args.hand), data_scaled['y']/127)
-                    osc_client.send_message("/{}/z".format(args.hand), data_scaled['z']/127)
-                    osc_client.send_message("/{}/trigger".format(args.hand), int(trigger))
+                        osc_client.send_message("/{}/{}".format(args.hand, dim), data_scaled/127)
 
-                if debug: debugstr = debugstr + '\nCCx Message: ' + str(ccx)
-                if debug: debugstr = debugstr + '\nCCy Message: ' + str(ccy)
-                if debug: debugstr = debugstr + '\nCCz Message: ' + str(ccz)
-
-                scaled_y = data_scaled['y']
-
-
+                    if dim == 'y':
                 haptic_threshold = 40
                 if args.no_haptic:
                     if haptic_loop_counter > 10:
-                        if (scaled_y > haptic_threshold):
-                            scaled_y_vib = int(scaled_y-haptic_threshold)*30
+                                if (data_scaled > haptic_threshold):
+                                    scaled_y_vib = int(data_scaled-haptic_threshold)*30
                             contr.trigger_haptic_pulse(duration_micros=scaled_y_vib)
                             haptic_loop_counter = 0
 
+
+                    # if debug: debugstr = debugstr + '\nScaled Pose for {}: {}'.format(dim, data_scaled)
 
 
 

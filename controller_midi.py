@@ -214,13 +214,13 @@ def get_inputs_and_pose(contr):
     if positionarray == None:
         pose = None
     else:
-        pose = {
+        pose = { #TODO: Integrate with triad data representation better?
             'x': positionarray[0],
             'y': positionarray[1],
             'z': positionarray[2],
-            'yaw': positionarray[3],
-            'pitch': positionarray[4],
-            'roll': positionarray[5]
+            'yaw': positionarray[3] + 180,
+            'pitch': positionarray[4] + 180,
+            'roll': positionarray[5] + 180
             }
 
         pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}

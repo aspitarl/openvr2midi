@@ -1,12 +1,13 @@
 import os
-from time import sleep
+import time
 #TODO: Improve imports and make consistent
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QComboBox, QFileSystemModel, QHBoxLayout, QRadioButton, QTreeView, QWidget, QVBoxLayout, QSplitter, QMenuBar, QMenu, QAction, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QLineEdit, QFrame, QSizePolicy
 from PyQt5 import QtCore
 from PyQt5.QtGui import QDoubleValidator
 
-from controller_midi import get_inputs_and_pose, scale_data, MIDI_CC_MAX
+from controller_midi import get_inputs_and_pose, scale_data
+from controller_midi import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 
 # MIDI_CC_MAX = 127
@@ -18,6 +19,8 @@ class DataThread(QtCore.QThread):
 
     data_obtained = QtCore.pyqtSignal(object, object)
     debug_signal = QtCore.pyqtSignal(str)
+
+    cube_ranges_update_signal = QtCore.pyqtSignal(dict)
 
     def __init__(self):
         QtCore.QThread.__init__(self)
@@ -32,6 +35,8 @@ class DataThread(QtCore.QThread):
 
         self.debug_console = None
         self.debug = False
+
+        self.save_range_dict = False
 
         # self.data_obtained.connect(self.send_data)
 
@@ -49,10 +54,17 @@ class DataThread(QtCore.QThread):
                     debug_str = str(inputs) + '\n\n' + str(pose)
                     self.debug_signal.emit(debug_str)
                     #TODO: how to remove this sleep here, can't figure out how to regulate handling of this signal in parent
-                    sleep(1)
+                    time.sleep(1)
                     # os.system('cls')
                     # print(inputs)
                     # print(pose)
+
+                #TODO: Move this into it's own class function here?
+                if inputs['button'] == RANGE_SET_BUTTON and pose != None:
+                    #enter range set mode
+                    self.range_set_mode(self.contr)
+                    self.cube_ranges_update_signal.emit(self.cube_ranges)
+
 
                 if pose is not None:   
                     if inputs['trackpad_touched']:                    
@@ -72,14 +84,36 @@ class DataThread(QtCore.QThread):
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            
 
-                # sleep(.1)
 
     def stop(self):
         self._isRunning = False
 
-    # def send_data(self, inputs, pose):
-    #     # print(inputs)
-    #     pass
+    def range_set_mode(self, contr):
+        inputs, pose = get_inputs_and_pose(contr)
+
+        cube_ranges = {
+            'x': {'min': pose['x'], 'max': pose['x']},
+            'y': {'min': pose['y'], 'max': pose['y']},
+            'z': {'min': pose['z'], 'max': pose['z']},
+            'yaw': {'min': pose['yaw'], 'max': pose['yaw']},
+            'pitch': {'min': pose['pitch'], 'max': pose['pitch']},
+            'roll': {'min': pose['roll'], 'max': pose['roll']}
+        }      
+
+        while(inputs['button'] == RANGE_SET_BUTTON):
+
+            inputs, pose = get_inputs_and_pose(contr)
+
+            if pose is not None:
+                for dim in pose:
+                    if pose[dim] < cube_ranges[dim]['min']:
+                        self.cube_ranges[dim]['min'] = pose[dim]
+                    elif pose[dim] > cube_ranges[dim]['max']:
+                        self.cube_ranges[dim]['max'] = pose[dim]
+
+            # sleep_time = WAIT_INTERVAL-(time.time()-start)
+            # if sleep_time>0:
+            #     time.sleep(sleep_time)
 
 class TextUpdateThread(QtCore.QThread):
     def __init__(self, text_edit_object: QtWidgets.QTextEdit):

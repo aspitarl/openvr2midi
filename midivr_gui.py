@@ -68,20 +68,22 @@ class MainWidget(QtWidgets.QWidget):
 
         # Signal selection and data thread 
 
-        select_layout = SignalSelectLayout()
-        layout.addLayout(select_layout)
+        self.select_layout = SignalSelectLayout()
+        layout.addLayout(self.select_layout)
 
         #TODO: don't pass these references? https://stackoverflow.com/questions/21857935/pyqt-segmentation-fault-sometimes
         self.datathread = DataThread()
-        self.datathread.cc_dict = select_layout.cc_dict
-        self.datathread.cube_ranges = select_layout.cube_ranges
+        self.datathread.cc_dict = self.select_layout.cc_dict
 
         # self.debug_thread = TextUpdateThread(self.debug_console)
         # self.datathread.data_obtained.connect(self.debug_thread.update_text)
 
         self.datathread.debug_signal.connect(self.debug_console.setText)
+        self.datathread.cube_ranges_update_signal.connect(self.update_cube_ranges)
 
         self.setLayout(layout)
+
+        self.load_cube_ranges()
 
     def enable_debug(self):
         if self.checkbox_debug.isChecked():
@@ -139,6 +141,16 @@ class MainWidget(QtWidgets.QWidget):
         self.datathread.contr = self.contr
         self.datathread.stop()
 
+    def load_cube_ranges(self):
+        with open('ranges_dict_right.json', 'r') as f:
+            self.cube_ranges = json.load(f)
+        
+        self.select_layout.update_range_widgets(self.cube_ranges)
+        self.datathread.cube_ranges = self.cube_ranges
+    
+    def update_cube_ranges(self, range_dict):
+        self.select_layout.update_range_widgets(range_dict)
+
 from controller_midi import cc_dict as default_cc_dict
 
 class SignalSelectLayout(QtWidgets.QVBoxLayout):
@@ -146,9 +158,6 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
         super().__init__(*args, **kwargs)
 
         # layout = QVBoxLayout()
-
-        with open('ranges_dict_right.json', 'r') as f:
-            self.cube_ranges = json.load(f)
 
         self.cc_layout_widget_dict = {}
         self.cc_dict = {}
@@ -173,17 +182,20 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             hlayout.addWidget(send_checkbox)
             self.cc_layout_widget_dict[sig]['send_checkbox'] = send_checkbox
 
-            if sig in self.cube_ranges:
+            if sig not in ['trigger']:
                 min_range = QLineEdit()
                 min_range.setFixedWidth(50)
-                min_range.setText("{:.3f}".format(self.cube_ranges[sig]['min']))
-                min_range.setAlignment(QtCore.Qt.AlignLeft)
+                min_range.setReadOnly(True)
+                # min_range.setText())
+                # min_range.setAlignment(QtCore.Qt.AlignLeft)
+                self.cc_layout_widget_dict[sig]['min_range_line_edit'] = min_range
                 hlayout.addWidget(min_range)
 
                 max_range = QLineEdit()
                 max_range.setFixedWidth(50)
-                max_range.setText("{:.3f}".format(self.cube_ranges[sig]['max']))
-                max_range.setAlignment(QtCore.Qt.AlignLeft)
+                max_range.setReadOnly(True)
+                # max_range.setText("{:.3f}".format(self.cube_ranges[sig]['max']))
+                self.cc_layout_widget_dict[sig]['max_range_line_edit'] = max_range
                 hlayout.addWidget(max_range)
 
 
@@ -200,8 +212,15 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             else:
                 self.cc_dict[sig] = None
                 
+    def update_range_widgets(self, range_dict): 
+        for sig in range_dict:
+            self.cc_layout_widget_dict[sig]['min_range_line_edit'].setText(
+                "{:.3f}".format(range_dict[sig]['min'])
+            )
 
-
+            self.cc_layout_widget_dict[sig]['max_range_line_edit'].setText(
+                "{:.3f}".format(range_dict[sig]['max'])
+            )
         # self.setLayout(layout)
 
 class MainWindow(QtWidgets.QMainWindow):

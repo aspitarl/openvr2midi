@@ -12,6 +12,9 @@ from curve_function_graphs import curve_quad
 import numpy as np
 
 MIDI_CC_MAX = 127
+RANGE_SET_BUTTON = 'b'
+SEND_DATA_BUTTON = 'a'
+WAIT_INTERVAL = 1/250
 
 #TODO: Figure out whether there should be different cc dicts for each controller (stress test 1 midi channel...)
 
@@ -79,8 +82,7 @@ def scale_data(data_raw, cube_ranges, dim, half):
 
     return scaled
 
-rangesetbutton = 'b'
-senddatabutton = 'a'
+
 
 def range_set_mode(contr, debugstr=''):
     inputs, pose = get_inputs_and_pose(contr)
@@ -94,7 +96,7 @@ def range_set_mode(contr, debugstr=''):
         'roll': {'min': pose['roll'], 'max': pose['roll']}
     }      
 
-    while(inputs['button'] == rangesetbutton):
+    while(inputs['button'] == RANGE_SET_BUTTON):
         debugstr = ''
 
         inputs, pose = get_inputs_and_pose(contr)
@@ -111,7 +113,7 @@ def range_set_mode(contr, debugstr=''):
 
             if debug: debugstr = debugstr + '\nRange: ' + str(cube_ranges)
 
-        sleep_time = interval-(time.time()-start)
+        sleep_time = WAIT_INTERVAL-(time.time()-start)
         if sleep_time>0:
             time.sleep(sleep_time)
         
@@ -175,9 +177,8 @@ if __name__ == '__main__':
 
     # from rtmidi.midiconstants import CONTROL_CHANGE, PITCH_BEND
 
-    interval = 1/250
 
-    print('wait interval is ' + str(interval))
+    print('wait WAIT_INTERVAL is ' + str(WAIT_INTERVAL))
 
     v = triad_openvr.triad_openvr()
     v.print_discovered_objects()
@@ -258,7 +259,7 @@ if __name__ == '__main__':
         if debug: 
             debugstr = 'Controller: ' + controller_name + '\nMidi Port Name: ' + midiportname# + '\nInputs ' + str(inputs)
 
-        if inputs['button'] == rangesetbutton and pose != None:
+        if inputs['button'] == RANGE_SET_BUTTON and pose != None:
             #enter range set mode
             cube_ranges = range_set_mode(contr)
             save_range_dict = True
@@ -274,7 +275,7 @@ if __name__ == '__main__':
             trigger = inputs['trigger']
             
             if pose is not None:   
-                if inputs['button'] == senddatabutton or inputs['trackpad_touched']:
+                if inputs['button'] == SEND_DATA_BUTTON or inputs['trackpad_touched']:
                     if debug:
                         pose_debug = {key: "{:5.3f}".format(val) for key, val in pose.items()}
                         debugstr = debugstr + '\nPose: ' + str(pose_debug)
@@ -305,7 +306,7 @@ if __name__ == '__main__':
 
 
 
-        sleep_time = interval-(time.time()-start)
+        sleep_time = WAIT_INTERVAL-(time.time()-start)
         if sleep_time>0:
             time.sleep(sleep_time)
             

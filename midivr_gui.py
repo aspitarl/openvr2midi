@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QGuiApplication
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 import sys
+import time
 
 import mido
 
@@ -51,31 +52,60 @@ class MainWidget(QtWidgets.QWidget):
         
         layout.addWidget(self.combobox_midichans)
 
+
+        # Debug Console
+        self.debug_console = QTextEdit()
+        self.debug_console.setReadOnly(True)
+        self.debug_console.setPlainText('')
+
+        self.checkbox_debug = QCheckBox('Enable Debugging')
+        self.checkbox_debug.setChecked(False)
+        self.checkbox_debug.stateChanged.connect(self.enable_debug)
+
+
+        layout.addWidget(self.checkbox_debug)
+        layout.addWidget(self.debug_console)
+
         # Signal selection and data thread 
 
         select_layout = SignalSelectLayout()
         layout.addLayout(select_layout)
 
+        #TODO: don't pass these references? https://stackoverflow.com/questions/21857935/pyqt-segmentation-fault-sometimes
         self.datathread = DataThread()
         self.datathread.cc_dict = select_layout.cc_dict
         self.datathread.cube_ranges = select_layout.cube_ranges
+
+        # self.debug_thread = TextUpdateThread(self.debug_console)
+        # self.datathread.data_obtained.connect(self.debug_thread.update_text)
+
+        self.datathread.debug_signal.connect(self.debug_console.setText)
+
         self.setLayout(layout)
 
-        self.discover_objects()
+    def enable_debug(self):
+        if self.checkbox_debug.isChecked():
+            self.datathread.debug = True
+            # self.debug_thread.start()
+        else:
+            self.datathread.debug = False
+            # self.debug_thread.stop()
 
     def discover_objects(self):
 
         self.v = triad_openvr.triad_openvr()
-        # v.print_discovered_objects()
+        # self.v.print_discovered_objects()
 
         #Indicate what controller belongs to which hand...Must be a more elegant way...
         present_controllers = [key for key in self.v.devices if 'controller' in key]
-
-        self.models = {controller: self.v.devices[controller].get_model() for controller in present_controllers}
-
-        self.combobox_objects.clear()
-        display_text = ["{}: {}".format(c, str(self.models[c])) for c in self.models.keys()]
-        self.combobox_objects.addItems(display_text)
+        try:
+            self.models = {controller: self.v.devices[controller].get_model() for controller in present_controllers}
+        except OSError as e:
+            raise e
+        else:
+            self.combobox_objects.clear()
+            display_text = ["{}: {}".format(c, str(self.models[c])) for c in self.models.keys()]
+            self.combobox_objects.addItems(display_text)
 
 
     def connect_object(self):

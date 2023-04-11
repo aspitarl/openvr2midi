@@ -11,6 +11,7 @@ import signal
 from curve_function_graphs import curve_quad
 import numpy as np
 
+MIDI_CC_MAX = 127
 
 #TODO: Figure out whether there should be different cc dicts for each controller (stress test 1 midi channel...)
 
@@ -45,8 +46,7 @@ direction_dict = {
     'roll': 1.0,
 }
 
-rangesetbutton = 'b'
-senddatabutton = 'a'
+
 
 
 def scale_data(data_raw, cube_ranges, dim, half):
@@ -79,6 +79,8 @@ def scale_data(data_raw, cube_ranges, dim, half):
 
     return scaled
 
+rangesetbutton = 'b'
+senddatabutton = 'a'
 
 def range_set_mode(contr, debugstr=''):
     inputs, pose = get_inputs_and_pose(contr)
@@ -153,7 +155,6 @@ def get_inputs_and_pose(contr):
 
 if __name__ == '__main__':
 
-    MIDI_CC_MAX = 127
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--hand", type=str, default='right', choices=['right','left'], 

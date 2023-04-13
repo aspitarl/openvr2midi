@@ -33,9 +33,9 @@ class MainWidget(QtWidgets.QWidget):
 
         # MIDI
         self.combobox_midichans = QComboBox()
-        # available_ports = mido.get_output_names()
-        # available_ports = [p for p in available_ports if 'Right' in p] #TODO: temporary
-        # self.combobox_midichans.addItems(available_ports)
+        available_ports = mido.get_output_names()
+        available_ports = [p for p in available_ports if 'Right' in p] #TODO: temporary
+        self.combobox_midichans.addItems(available_ports)
         layout.addWidget(self.combobox_midichans)
 
 

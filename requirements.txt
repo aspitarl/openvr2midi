@@ -1,0 +1,12 @@
+mido==1.2.10
+numpy==1.24.2
+openvr==1.23.701
+pandas==2.0.0
+PyQt5==5.15.9
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.12.0
+python-dateutil==2.8.2
+python-osc==1.8.1
+pytz==2023.3
+six==1.16.0
+tzdata==2023.3

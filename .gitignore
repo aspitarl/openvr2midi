@@ -2,3 +2,4 @@
 workspace.code*
 .vscode
 *.pyc
+venv

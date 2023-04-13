@@ -4,13 +4,9 @@ import time
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QComboBox, QFileSystemModel, QHBoxLayout, QRadioButton, QTreeView, QWidget, QVBoxLayout, QSplitter, QMenuBar, QMenu, QAction, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QLineEdit, QFrame, QSizePolicy
 from PyQt5 import QtCore
-from PyQt5.QtGui import QDoubleValidator
 
 from controller_midi import get_inputs_and_pose, scale_data
 from controller_midi import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
-
-
-# MIDI_CC_MAX = 127
 
 import mido
 
@@ -38,8 +34,6 @@ class DataThread(QtCore.QThread):
 
         self.save_range_dict = False
 
-        # self.data_obtained.connect(self.send_data)
-
     def run(self):
         """Long-running task."""
 
@@ -50,14 +44,10 @@ class DataThread(QtCore.QThread):
                 inputs, pose = get_inputs_and_pose(self.contr)
 
                 if self.debug:
-                    # self.data_obtained.emit(inputs, pose)
                     debug_str = str(inputs) + '\n\n' + str(pose)
                     self.debug_signal.emit(debug_str)
                     #TODO: how to remove this sleep here, can't figure out how to regulate handling of this signal in parent
                     time.sleep(1)
-                    # os.system('cls')
-                    # print(inputs)
-                    # print(pose)
 
                 #TODO: Move this into it's own class function here?
                 if inputs['button'] == RANGE_SET_BUTTON and pose != None:
@@ -65,16 +55,12 @@ class DataThread(QtCore.QThread):
                     self.range_set_mode(self.contr)
                     self.cube_ranges_update_signal.emit(self.cube_ranges)
 
-
                 if pose is not None:   
                     if inputs['trackpad_touched']:                    
-
-                        
                         trigger = inputs['trigger']
 
                         for dim in self.cc_dict:
                             if self.cc_dict[dim]:
-
                                 if dim == 'trigger':
                                     data_scaled = int(trigger)*MIDI_CC_MAX
                                 else:
@@ -84,7 +70,6 @@ class DataThread(QtCore.QThread):
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            
-
 
     def stop(self):
         self._isRunning = False
@@ -121,6 +106,10 @@ class DataThread(QtCore.QThread):
                 time.sleep(sleep_time)
 
 class TextUpdateThread(QtCore.QThread):
+    """
+    Unsuccessful attempt to enable debugging with a parallel thread that would update the debug texteditwidget
+    """
+
     def __init__(self, text_edit_object: QtWidgets.QTextEdit):
         QtCore.QThread.__init__(self)
 

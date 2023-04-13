@@ -34,6 +34,8 @@ class DataThread(QtCore.QThread):
 
         self.save_range_dict = False
 
+        self.enable_half_y = False
+
     def run(self):
         """Long-running task."""
 
@@ -64,8 +66,11 @@ class DataThread(QtCore.QThread):
                                 if dim == 'trigger':
                                     data_scaled = int(trigger)*MIDI_CC_MAX
                                 else:
-                                    # half_mode = True if (dim == 'y') and (trigger == 1) else False
-                                    half_mode = False
+                                    if self.enable_half_y:
+                                        half_mode = True if (dim == 'y') and (trigger == 1) else False
+                                    else:
+                                        half_mode = False
+                                        
                                     data_scaled = scale_data(pose, self.cube_ranges, dim, half=half_mode)
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)

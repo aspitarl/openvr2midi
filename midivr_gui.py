@@ -3,17 +3,12 @@ from PyQt5.QtGui import QIntValidator, QGuiApplication
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 import sys
-import time
 
 import mido
-
-from triad_openvr import triad_openvr
-
-
 import json
 
+from triad_openvr import triad_openvr
 from gui_fns import DataThread
-
 
 class MainWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
@@ -38,21 +33,11 @@ class MainWidget(QtWidgets.QWidget):
 
         # MIDI
         self.combobox_midichans = QComboBox()
-        available_ports = mido.get_output_names()
-        available_ports = [p for p in available_ports if 'Right' in p] #TODO: temporary
-        self.combobox_midichans.addItems(available_ports)
+        # available_ports = mido.get_output_names()
+        # available_ports = [p for p in available_ports if 'Right' in p] #TODO: temporary
+        # self.combobox_midichans.addItems(available_ports)
         layout.addWidget(self.combobox_midichans)
 
-        # Debug Console
-        self.debug_console = QTextEdit()
-        self.debug_console.setReadOnly(True)
-        self.debug_console.setPlainText('')
-        layout.addWidget(self.debug_console)
-
-        self.checkbox_debug = QCheckBox('Enable Debugging')
-        self.checkbox_debug.setChecked(False)
-        self.checkbox_debug.stateChanged.connect(self.enable_debug)
-        layout.addWidget(self.checkbox_debug)
 
         # Signal selection and data thread 
 
@@ -60,15 +45,40 @@ class MainWidget(QtWidgets.QWidget):
         layout.addLayout(self.select_layout)
 
         #TODO: don't pass cc_dict reference? Could we replace this with a data model? See select_layout. https://stackoverflow.com/questions/21857935/pyqt-segmentation-fault-sometimes
+        # also, datathread splits data into two dictionaries....
         self.datathread = DataThread()
         self.datathread.cc_dict = self.select_layout.cc_dict
+        self.datathread.cube_ranges_update_signal.connect(self.update_cube_ranges)
+
+
+        #TODO: these also are janky data communications between mainwidget and thread, like signal select layout. 
+        self.checkbox_ymode = QCheckBox('Enable Half Y mode')
+        self.checkbox_ymode.setChecked(self.datathread.enable_half_y)
+        self.checkbox_ymode.stateChanged.connect(self.enable_disable_ymode)
+        layout.addWidget(self.checkbox_ymode)
+
+        self.checkbox_debug = QCheckBox('Enable Debugging')
+        self.checkbox_debug.setChecked(False)
+        self.checkbox_debug.stateChanged.connect(self.enable_debug)
+        layout.addWidget(self.checkbox_debug)
+
+        # Debug Console
+        self.debug_console = QTextEdit()
+        self.debug_console.setReadOnly(True)
+        self.debug_console.setPlainText('')
+        layout.addWidget(self.debug_console)
 
         self.datathread.debug_signal.connect(self.debug_console.setText)
-        self.datathread.cube_ranges_update_signal.connect(self.update_cube_ranges)
 
         self.setLayout(layout)
 
         self.load_cube_ranges()
+
+    def enable_disable_ymode(self):
+        if self.checkbox_ymode.isChecked():
+            self.datathread.enable_half_y = True
+        else:
+            self.datathread.enable_half_y = False
 
     def enable_debug(self):
         if self.checkbox_debug.isChecked():

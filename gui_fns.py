@@ -35,13 +35,17 @@ class DataThread(QtCore.QThread):
         self.save_range_dict = False
 
         self.enable_half_y = False
+        self.enable_haptic = True
 
     def run(self):
         """Long-running task."""
 
         if self.contr:
+            haptic_loop_counter = 0
             self._isRunning = True
             while self._isRunning:
+                if self.enable_haptic: haptic_loop_counter += 1
+                start = time.time()
                 
                 inputs, pose = get_inputs_and_pose(self.contr)
 
@@ -75,6 +79,19 @@ class DataThread(QtCore.QThread):
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            
+
+                                if dim == 'y':
+                                    haptic_threshold = 40
+                                    if self.enable_haptic:
+                                        if haptic_loop_counter > 10:
+                                            if (data_scaled > haptic_threshold):
+                                                scaled_y_vib = int(data_scaled-haptic_threshold)*30
+                                                self.contr.trigger_haptic_pulse(duration_micros=scaled_y_vib)
+                                                haptic_loop_counter = 0
+                
+                sleep_time = WAIT_INTERVAL-(time.time()-start)
+                if sleep_time>0:
+                    time.sleep(sleep_time)
 
     def stop(self):
         self._isRunning = False

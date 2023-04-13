@@ -162,11 +162,22 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
         self.cc_layout_widget_dict = {}
         self.cc_dict = {}
 
+        vlayout = QVBoxLayout()
+
+        self.pushbutton_change_all = QPushButton('enable/disable all')
+        self.pushbutton_change_all.clicked.connect(self.enable_disable_all)
+
+        self.all_enabled = True
+
+        vlayout.addWidget(self.pushbutton_change_all)
+
+
+
         for sig in default_cc_dict:
             self.cc_layout_widget_dict[sig] = {}
 
-
             hlayout = QHBoxLayout()
+
             hlayout.addWidget(QLabel(sig))
             
             cc_spinbox = QSpinBox()
@@ -199,9 +210,23 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
                 hlayout.addWidget(max_range)
 
 
-            self.addLayout(hlayout)
+            vlayout.addLayout(hlayout)
 
-            self.update_cc_dict()
+        self.update_cc_dict()
+        self.addLayout(vlayout)
+
+    def enable_disable_all(self):
+        if self.all_enabled:
+            self.all_enabled = False
+        else:
+            self.all_enabled = True
+
+        for sig in self.cc_layout_widget_dict:
+            self.cc_layout_widget_dict[sig]['send_checkbox'].blockSignals(True)
+            self.cc_layout_widget_dict[sig]['send_checkbox'].setChecked(self.all_enabled)
+            self.cc_layout_widget_dict[sig]['send_checkbox'].blockSignals(False)
+        
+        self.update_cc_dict()
 
     def update_cc_dict(self):
 

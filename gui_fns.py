@@ -78,7 +78,8 @@ class DataThread(QtCore.QThread):
                                 if dim == 'trigger':
                                     data_scaled = int(trigger)*MIDI_CC_MAX
                                 else:
-                                    half_mode = True if (dim == 'y') and (trigger == 1) else False
+                                    # half_mode = True if (dim == 'y') and (trigger == 1) else False
+                                    half_mode = False
                                     data_scaled = scale_data(pose, self.cube_ranges, dim, half=half_mode)
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
@@ -89,9 +90,13 @@ class DataThread(QtCore.QThread):
         self._isRunning = False
 
     def range_set_mode(self, contr):
+
+        self.debug_signal.emit("entering range set mode")
+        start = time.time()
+
         inputs, pose = get_inputs_and_pose(contr)
 
-        cube_ranges = {
+        self.cube_ranges = {
             'x': {'min': pose['x'], 'max': pose['x']},
             'y': {'min': pose['y'], 'max': pose['y']},
             'z': {'min': pose['z'], 'max': pose['z']},
@@ -106,14 +111,14 @@ class DataThread(QtCore.QThread):
 
             if pose is not None:
                 for dim in pose:
-                    if pose[dim] < cube_ranges[dim]['min']:
+                    if pose[dim] < self.cube_ranges[dim]['min']:
                         self.cube_ranges[dim]['min'] = pose[dim]
-                    elif pose[dim] > cube_ranges[dim]['max']:
+                    elif pose[dim] > self.cube_ranges[dim]['max']:
                         self.cube_ranges[dim]['max'] = pose[dim]
 
-            # sleep_time = WAIT_INTERVAL-(time.time()-start)
-            # if sleep_time>0:
-            #     time.sleep(sleep_time)
+            sleep_time = WAIT_INTERVAL-(time.time()-start)
+            if sleep_time>0:
+                time.sleep(sleep_time)
 
 class TextUpdateThread(QtCore.QThread):
     def __init__(self, text_edit_object: QtWidgets.QTextEdit):

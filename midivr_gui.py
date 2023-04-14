@@ -16,20 +16,16 @@ class MainWidget(QtWidgets.QWidget):
 
         layout = QVBoxLayout()
 
-        self.pushbutton_discover = QPushButton('Discover Objects')
+        #OpenVR layout
+        openvr_hlayout = QHBoxLayout()
+        self.pushbutton_discover = QPushButton('Discover OpenVR Objects')
         self.pushbutton_discover.clicked.connect(self.discover_objects)
-        layout.addWidget(self.pushbutton_discover)
 
         self.combobox_objects = QComboBox()
-        layout.addWidget(self.combobox_objects)
+        openvr_hlayout.addWidget(self.pushbutton_discover)
+        openvr_hlayout.addWidget(self.combobox_objects)
 
-        self.pushbutton_connect = QPushButton('Connect')
-        self.pushbutton_connect.clicked.connect(self.connect_object)
-        layout.addWidget(self.pushbutton_connect)
-
-        self.pushbutton_disconnect = QPushButton('Disconnect')
-        self.pushbutton_disconnect.clicked.connect(self.disconnect_object)
-        layout.addWidget(self.pushbutton_disconnect)
+        layout.addLayout(openvr_hlayout)
 
         # MIDI
         self.combobox_midichans = QComboBox()
@@ -38,6 +34,10 @@ class MainWidget(QtWidgets.QWidget):
         self.combobox_midichans.addItems(available_ports)
         layout.addWidget(self.combobox_midichans)
 
+        # Connect midi and OpenVR
+        self.pushbutton_connect = QPushButton('Connect')
+        self.pushbutton_connect.clicked.connect(self.connect_object)
+        layout.addWidget(self.pushbutton_connect)
 
         # Signal selection and data thread 
 
@@ -69,6 +69,11 @@ class MainWidget(QtWidgets.QWidget):
         layout.addWidget(self.debug_console)
 
         self.datathread.debug_signal.connect(self.debug_console.setText)
+
+
+        self.pushbutton_disconnect = QPushButton('Disconnect')
+        self.pushbutton_disconnect.clicked.connect(self.disconnect_object)
+        layout.addWidget(self.pushbutton_disconnect)
 
         self.setLayout(layout)
 
@@ -105,11 +110,11 @@ class MainWidget(QtWidgets.QWidget):
         controller_idx = self.combobox_objects.currentIndex()
         model_keys = list(self.models.keys())
         controller_name = model_keys[controller_idx]
-        print("connecting to " + controller_name)
+        self.debug_console.setText("connecting to " + str(controller_name))
         self.contr = self.v.devices[controller_name]
 
         midi_port = self.combobox_midichans.currentText()
-        print('Connecting to midi port: ' + midi_port)
+        self.debug_console.append('Connecting to midi port: ' + midi_port)
         self.midiout = mido.open_output(midi_port)
 
         self.datathread.contr = self.contr
@@ -231,7 +236,7 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setWindowTitle('trc File Viewer')
+        self.setWindowTitle('OpenVR to MIDI')
 
         menuBar = QMenuBar(self)
         self.setMenuBar(menuBar)

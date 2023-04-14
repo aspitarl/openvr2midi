@@ -6,6 +6,7 @@ import sys
 
 import mido
 import json
+from pythonosc import udp_client
 
 from triad_openvr import triad_openvr
 from gui_fns import DataThread
@@ -17,6 +18,9 @@ class MainWidget(QtWidgets.QWidget):
         self.midiout = None
 
         layout = QVBoxLayout()
+
+        #Thread for obtaining and sending out data
+        self.datathread = DataThread()
 
         #OpenVR layout
         openvr_hlayout = QHBoxLayout()
@@ -46,12 +50,15 @@ class MainWidget(QtWidgets.QWidget):
         self.select_layout = SignalSelectLayout()
         layout.addLayout(self.select_layout)
 
+        self.OSC_layout = OSCLayout()
+        layout.addLayout(self.OSC_layout)
+        self.OSC_layout.enable_OSC.setChecked(False)
+        self.OSC_layout.enable_OSC.stateChanged.connect(self.enable_disable_OSC)
+
         #TODO: don't pass cc_dict reference? Could we replace this with a data model? See select_layout. https://stackoverflow.com/questions/21857935/pyqt-segmentation-fault-sometimes
         # also, datathread splits data into two dictionaries....
-        self.datathread = DataThread()
         self.datathread.cc_dict = self.select_layout.cc_dict
         self.datathread.cube_ranges_update_signal.connect(self.update_cube_ranges)
-
 
         #TODO: these also are janky data communications between mainwidget and thread, like signal select layout. 
         self.checkbox_ymode = QCheckBox('Enable Half Y mode')
@@ -75,6 +82,15 @@ class MainWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
         self.load_cube_ranges()
+
+    #TODO: These functions probably can be replaced by lambda, but also would be fixed by using a data model
+    def enable_disable_OSC(self):
+        if self.OSC_layout.enable_OSC.isChecked():
+            self.debug_console.setText("Sending osc messages to IP: {} over port {}".format(self.OSC_layout.ip, self.OSC_layout.port))
+            self.datathread.osc_client = udp_client.SimpleUDPClient(self.OSC_layout.ip, self.OSC_layout.port)
+        else:
+            self.debug_console.setText("Disabling OSC")
+            self.datathread.osc_client = None
 
     def enable_disable_ymode(self):
         if self.checkbox_ymode.isChecked():
@@ -139,6 +155,18 @@ class MainWidget(QtWidgets.QWidget):
         self.select_layout.update_range_widgets(range_dict)
 
 from controller_midi import cc_dict as default_cc_dict
+class OSCLayout(QtWidgets.QVBoxLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.enable_OSC = QCheckBox("Enable OSC")
+
+        self.addWidget(self.enable_OSC)
+
+        self.ip = '192.168.0.255'
+        self.port = 10000
+
+
 
 class SignalSelectLayout(QtWidgets.QVBoxLayout):
     def __init__(self, *args, **kwargs):

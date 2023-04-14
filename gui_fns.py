@@ -35,6 +35,7 @@ class DataThread(QtCore.QThread):
         self.save_range_dict = False
 
         self.enable_half_y = False
+        self.OSC_client = None
         self.enable_haptic = True
 
     def run(self):
@@ -79,6 +80,10 @@ class DataThread(QtCore.QThread):
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            
+
+
+                                if self.osc_client != None:
+                                    self.osc_client.send_message("/{}/{}".format('right', dim), data_scaled/127)
 
                                 if dim == 'y':
                                     haptic_threshold = 40

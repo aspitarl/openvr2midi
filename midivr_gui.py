@@ -14,6 +14,8 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.midiout = None
+
         layout = QVBoxLayout()
 
         #OpenVR layout
@@ -70,11 +72,6 @@ class MainWidget(QtWidgets.QWidget):
 
         self.datathread.debug_signal.connect(self.debug_console.setText)
 
-
-        self.pushbutton_disconnect = QPushButton('Disconnect')
-        self.pushbutton_disconnect.clicked.connect(self.disconnect_object)
-        layout.addWidget(self.pushbutton_disconnect)
-
         self.setLayout(layout)
 
         self.load_cube_ranges()
@@ -121,10 +118,11 @@ class MainWidget(QtWidgets.QWidget):
         self.datathread.midiout = self.midiout
         self.datathread.start()
 
-    def disconnect_object(self):
+    def disconnect_objects(self):
         #TODO: need to duplicate these?
         self.contr = None
-        self.midiout.close()
+        if self.midiout:
+            self.midiout.close()
 
         self.datathread.midiout = None
         self.datathread.contr = self.contr
@@ -233,6 +231,8 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             )
         # self.setLayout(layout)
 
+from PyQt5.QtGui import QCloseEvent
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -243,6 +243,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.main_widget = MainWidget()
         self.setCentralWidget(self.main_widget)
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print('Recieved Close event, Disconnecting Objects')
+        self.main_widget.disconnect_objects()
+        return super().closeEvent(a0)
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

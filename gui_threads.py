@@ -1,8 +1,6 @@
 import os
 import time
-#TODO: Improve imports and make consistent
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QComboBox, QFileSystemModel, QHBoxLayout, QRadioButton, QTreeView, QWidget, QVBoxLayout, QSplitter, QMenuBar, QMenu, QAction, QFileDialog, QTableWidget, QTableWidgetItem, QLabel, QLineEdit, QFrame, QSizePolicy
 from PyQt5 import QtCore
 
 from controller_midi import get_inputs_and_pose, scale_data
@@ -82,8 +80,8 @@ class DataThread(QtCore.QThread):
                                 self.midiout.send(cc)            
 
 
-                                if self.osc_client != None:
-                                    self.osc_client.send_message("/{}/{}".format('right', dim), data_scaled/127)
+                                if self.OSC_client != None:
+                                    self.OSC_client.send_message("/{}/{}".format('right', dim), data_scaled/127)
 
                                 if dim == 'y':
                                     haptic_threshold = 40

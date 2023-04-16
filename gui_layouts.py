@@ -10,7 +10,7 @@ class OSCLayout(QtWidgets.QVBoxLayout):
 
         self.addWidget(self.enable_OSC)
 
-        self.ip = '192.168.0.255'
+        self.ip = '192.168.0.7'
         self.port = 10000
 
 

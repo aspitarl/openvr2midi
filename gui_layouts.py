@@ -35,6 +35,10 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
 
         vlayout.addWidget(self.pushbutton_change_all)
 
+        # Radio buttons
+        self.solo_group = QButtonGroup()
+        self.solo_group.setExclusive(False) # You cannot apparently have exclusive and allow for deselection
+
         for sig in default_cc_dict:
             self.cc_layout_widget_dict[sig] = {}
 
@@ -53,6 +57,14 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             send_checkbox.stateChanged.connect(self.update_cc_dict)
             self.cc_layout_widget_dict[sig]['send_checkbox'] = send_checkbox
             hlayout.addWidget(send_checkbox)
+
+            solo_radio = QCheckBox()
+            solo_radio.sig_name = sig
+            solo_radio.setChecked(False)
+            solo_radio.stateChanged.connect(self.update_solo)
+            self.solo_group.addButton(solo_radio)
+            hlayout.addWidget(solo_radio)
+
 
             if sig not in ['trigger']:
                 min_range = QLineEdit()
@@ -84,6 +96,31 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             self.cc_layout_widget_dict[sig]['send_checkbox'].blockSignals(False)
         
         self.update_cc_dict()
+
+    def update_solo(self):
+
+        #TODO: make enable dict use this method
+        #https://stackoverflow.com/questions/35819538/using-lambda-expression-to-connect-slots-in-pyqt
+        soloed_checkbox = self.sender()
+
+        is_checked = soloed_checkbox.isChecked()
+        sig_name = soloed_checkbox.sig_name
+
+        for solo_checkbox in self.solo_group.buttons():
+            if solo_checkbox != soloed_checkbox:
+                solo_checkbox.blockSignals(True)
+                solo_checkbox.setChecked(False)
+                solo_checkbox.blockSignals(False)
+
+        if is_checked:
+            for sig in self.cc_layout_widget_dict:
+                widgets = self.cc_layout_widget_dict[sig]
+                if sig == sig_name:
+                    self.cc_dict[sig] = widgets['cc_spinbox'].value()
+                else:
+                    self.cc_dict[sig] = None
+        else:
+            self.update_cc_dict()
 
     def update_cc_dict(self):
 

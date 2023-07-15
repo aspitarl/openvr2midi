@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
-from controller_midi import cc_dict as default_cc_dict
+from controller_midi import cc_dict as default_cc_dict, default_enabled_dict
 
 class OSCLayout(QtWidgets.QVBoxLayout):
     def __init__(self, *args, **kwargs):
@@ -12,7 +12,6 @@ class OSCLayout(QtWidgets.QVBoxLayout):
 
         self.ip = '192.168.10.255'
         self.port = 10000
-
 
 
 class SignalSelectLayout(QtWidgets.QVBoxLayout):
@@ -50,7 +49,7 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
             hlayout.addWidget(cc_spinbox)
 
             send_checkbox = QCheckBox()
-            send_checkbox.setChecked(self.all_enabled)
+            send_checkbox.setChecked(default_enabled_dict[sig])
             send_checkbox.stateChanged.connect(self.update_cc_dict)
             self.cc_layout_widget_dict[sig]['send_checkbox'] = send_checkbox
             hlayout.addWidget(send_checkbox)

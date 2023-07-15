@@ -30,6 +30,18 @@ cc_dict = {
     # 'tpy':26,
 }
 
+
+default_enabled_dict = {
+    'x': True,
+    'y': True,
+    'z': True,
+    'yaw': True,
+    'pitch': False,
+    'roll': False,
+    'trigger':True,
+    # 'tpy':26,
+}
+
 def signal_handler(signal, frame):
     """Runs and exits when crtl-C is pressed"""
     print("\nprogram exiting gracefully")

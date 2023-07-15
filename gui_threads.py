@@ -154,3 +154,31 @@ class TextUpdateThread(QtCore.QThread):
     def update_text(self, input, pose):
         text = str(input) + '\n\n ' + str(pose)
         self.display_text = text
+
+
+
+## Pitchbend archive
+
+# ## Not sure exactly how pitchbend works in mido, use 'pitch wheel'?
+
+#     if inputs['trackpad_touched']:
+#         tpy = int(inputs['trackpad_y']*64+64)
+
+#         # cctpy = [CONTROL_CHANGE, cc_dict['tpy'], tpy]
+#         # midiout.send_message(cctpy)  
+
+
+#         pb = tpy
+#         # pb = [PITCH_BEND, 0 , pb]
+#         pb = mido.Message('pitchwheel', value=pb)
+#         midiout.send(pb)
+
+#         # if debug: debugstr = debugstr + '\npb Message: ' + str(pb)
+#         trackpad_reset = True
+# else:
+#     if trackpad_reset:
+#         # cctpy = [CONTROL_CHANGE, cc_dict['tpy'], 64]
+#         cctpy= mido.Message('control_change',control=cc_dict['tpy'], value=64)
+#         midiout.send(cctpy)
+#         trackpad_reset = False
+        

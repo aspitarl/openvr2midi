@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIntValidator, QGuiApplication
 from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtWidgets
 import sys
 
@@ -35,6 +36,9 @@ default_cc_dict_controllers = {
 
 
 class MainWidget(QtWidgets.QWidget):
+
+    midi_channel_changed_signal = pyqtSignal(name='midi_channel_changed')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -69,8 +73,8 @@ class MainWidget(QtWidgets.QWidget):
         layout.addWidget(self.pushbutton_connect)
 
         # Signal selection and data thread 
-        self.combobox_midichans.currentIndexChanged.connect(self.update_cc_dict) #TODO: Hacky way of talking to signal select layout
-        default_cc_dict = default_cc_dict_controllers['Right Controller']
+        self.combobox_midichans.currentIndexChanged.connect(self.midi_channel_changed) #TODO: Hacky way of talking to signal select layout
+        default_cc_dict = default_cc_dict_controllers[self.get_selected_controller_name()]
         self.select_layout = SignalSelectLayout(default_cc_dict)
         layout.addLayout(self.select_layout)
 
@@ -107,16 +111,21 @@ class MainWidget(QtWidgets.QWidget):
 
         self.load_cube_ranges()
 
-    def update_cc_dict(self):
-        #TODO: move this combobox within signal select layout? 
-
+    def get_selected_controller_name(self):
+        # The midi port seems to have random numbers at the end, so just extract the name to use in dicts etc.
         current_midi_chan = self.combobox_midichans.currentText()
         contr_name = 'Right Controller' if 'Right Controller' in current_midi_chan else 'Left Controller'
+
+        return contr_name
+
+    def midi_channel_changed(self):
+        #TODO: move this combobox within signal select layout? 
+        
+        contr_name = self.get_selected_controller_name()
         cc_dict = default_cc_dict_controllers[contr_name]
         self.select_layout.set_cc_vals(cc_dict)
 
-
-
+        self.midi_channel_changed_signal.emit() # To tell the main window to update the title
 
     #TODO: These functions probably can be replaced by lambda, but also would be fixed by using a data model
     def enable_disable_OSC(self):
@@ -201,17 +210,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.main_widget = MainWidget()
         self.setCentralWidget(self.main_widget)
+        self.main_widget.midi_channel_changed_signal.connect(self.update_title)
+        self.update_title()
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         print('Recieved Close event, Disconnecting Objects')
         self.main_widget.disconnect_objects()
         return super().closeEvent(a0)
+    
+    def update_title(self):
+        contr_name = self.main_widget.get_selected_controller_name()
+        self.setWindowTitle(contr_name)
+
 
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    mainwindow = MainWindow()
-    mainwindow.show()
+    main_window = MainWindow()
+    main_window.main_widget.main_window = main_window # Weird way to allow main widget to change window title...
+    main_window.show()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

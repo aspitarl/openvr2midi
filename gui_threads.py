@@ -32,7 +32,7 @@ class DataThread(QtCore.QThread):
 
         self.save_range_dict = False
 
-        self.enable_half_y = False
+        self.enable_half_y = True
         self.OSC_client = None
         self.enable_haptic = True
 

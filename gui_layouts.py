@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
-from controller_midi import cc_dict as default_cc_dict, default_enabled_dict
+from controller_midi import default_enabled_dict
+
 
 class OSCLayout(QtWidgets.QVBoxLayout):
     def __init__(self, *args, **kwargs):
@@ -15,7 +16,7 @@ class OSCLayout(QtWidgets.QVBoxLayout):
 
 
 class SignalSelectLayout(QtWidgets.QVBoxLayout):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, default_cc_dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         #TODO: This cc dict is acting like a model. Move to a Table model? or custom model with a custom view of widgets? 
@@ -83,6 +84,10 @@ class SignalSelectLayout(QtWidgets.QVBoxLayout):
 
         self.update_cc_dict()
         self.addLayout(vlayout)
+    
+    def set_cc_vals(self, cc_dict):
+        for sig in cc_dict:
+            self.cc_layout_widget_dict[sig]['cc_spinbox'].setValue(cc_dict[sig])
 
     def enable_disable_all(self):
         if self.all_enabled:

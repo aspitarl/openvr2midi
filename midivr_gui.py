@@ -12,6 +12,28 @@ from triad_openvr import triad_openvr
 from gui_threads import DataThread
 from gui_layouts import SignalSelectLayout, OSCLayout
 
+default_cc_dict_controllers = {
+    'Right Controller' : {
+    'x': 22,
+    'y': 23,
+    'z': 24,
+    'yaw': 25,
+    'pitch': 26,
+    'roll': 27,
+    'trigger':28,
+},
+    'Left Controller': {
+    'x': 32,
+    'y': 33,
+    'z': 34,
+    'yaw': 35,
+    'pitch': 36,
+    'roll': 37,
+    'trigger':38,
+    }
+}
+
+
 class MainWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,8 +69,9 @@ class MainWidget(QtWidgets.QWidget):
         layout.addWidget(self.pushbutton_connect)
 
         # Signal selection and data thread 
-
-        self.select_layout = SignalSelectLayout()
+        self.combobox_midichans.currentIndexChanged.connect(self.update_cc_dict) #TODO: Hacky way of talking to signal select layout
+        default_cc_dict = default_cc_dict_controllers['Right Controller']
+        self.select_layout = SignalSelectLayout(default_cc_dict)
         layout.addLayout(self.select_layout)
 
         self.OSC_layout = OSCLayout()
@@ -83,6 +106,17 @@ class MainWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
         self.load_cube_ranges()
+
+    def update_cc_dict(self):
+        #TODO: move this combobox within signal select layout? 
+
+        current_midi_chan = self.combobox_midichans.currentText()
+        contr_name = 'Right Controller' if 'Right Controller' in current_midi_chan else 'Left Controller'
+        cc_dict = default_cc_dict_controllers[contr_name]
+        self.select_layout.set_cc_vals(cc_dict)
+
+
+
 
     #TODO: These functions probably can be replaced by lambda, but also would be fixed by using a data model
     def enable_disable_OSC(self):

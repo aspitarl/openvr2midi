@@ -67,10 +67,24 @@ class MainWidget(QtWidgets.QWidget):
         self.combobox_midichans.addItems(available_ports)
         layout.addWidget(self.combobox_midichans)
 
+        connect_hlayout = QHBoxLayout()
+
         # Connect midi and OpenVR
         self.pushbutton_connect = QPushButton('Connect')
         self.pushbutton_connect.clicked.connect(self.connect_object)
-        layout.addWidget(self.pushbutton_connect)
+        connect_hlayout.addWidget(self.pushbutton_connect)
+
+        # Disconnect midi and OpenVR
+        self.pushbutton_connect = QPushButton('Disconnect')
+        self.pushbutton_connect.clicked.connect(self.disconnect_objects)
+        connect_hlayout.addWidget(self.pushbutton_connect)
+
+        self.checkbox_isconnected = QCheckBox('Connected?')
+        self.checkbox_isconnected.setEnabled(False)
+        # self.checkbox_isconnected.set
+        connect_hlayout.addWidget(self.checkbox_isconnected)
+
+        layout.addLayout(connect_hlayout)
 
         # Signal selection and data thread 
         self.combobox_midichans.currentIndexChanged.connect(self.midi_channel_changed) #TODO: Hacky way of talking to signal select layout
@@ -178,15 +192,22 @@ class MainWidget(QtWidgets.QWidget):
         self.datathread.midiout = self.midiout
         self.datathread.start()
 
+        self.checkbox_isconnected.setChecked(True)
+
+    def close_midi(self):
+        if self.midiout:
+            self.midiout.close()
+
     def disconnect_objects(self):
         #TODO: need to duplicate these?
         self.contr = None
-        if self.midiout:
-            self.midiout.close()
+        self.close_midi()
 
         self.datathread.midiout = None
         self.datathread.contr = self.contr
         self.datathread.stop()
+
+        self.checkbox_isconnected.setChecked(False)
 
     def load_cube_ranges(self):
         with open('ranges_dict_right.json', 'r') as f:

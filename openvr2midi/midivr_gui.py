@@ -4,6 +4,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtWidgets
 import sys
+import os
 
 import mido
 import json
@@ -34,6 +35,9 @@ default_cc_dict_controllers = {
     }
 }
 
+
+
+settings_dir = 'settings/'
 
 class MainWidget(QtWidgets.QWidget):
 
@@ -210,7 +214,7 @@ class MainWidget(QtWidgets.QWidget):
         self.checkbox_isconnected.setChecked(False)
 
     def load_cube_ranges(self):
-        with open('ranges_dict_right.json', 'r') as f:
+        with open(os.path.join(settings_dir, 'ranges_dict_right.json'), 'r') as f:
             self.cube_ranges = json.load(f)
         
         self.select_layout.update_range_widgets(self.cube_ranges)

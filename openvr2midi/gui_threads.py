@@ -8,6 +8,8 @@ from utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 import mido
 
+
+
 class DataThread(QtCore.QThread):
     # https://stackoverflow.com/questions/9957195/updating-gui-elements-in-multithreaded-pyqt
 

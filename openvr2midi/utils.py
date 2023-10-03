@@ -6,6 +6,17 @@ SEND_DATA_BUTTON = 'a'
 WAIT_INTERVAL = 1/250
 
 
+#This is for flipping the axes along an axis. currently done during pose retrival TODO: More elegant way?
+direction_dict = {
+    'x': 1.0,
+    'y': 1.0,
+    'z': 1.0,
+    'yaw': 1.0,
+    'pitch': 1.0,
+    'roll': 1.0,
+}
+
+
 def curve_quad(cc_val, curve_amt):
     cc_val = cc_val/127
     cc_out = 127*( cc_val + curve_amt*(cc_val - cc_val**2) )
@@ -43,46 +54,6 @@ def scale_data(data_raw, cube_ranges, dim, half):
     return scaled
 
 
-
-def range_set_mode(contr, debugstr=''):
-    inputs, pose = get_inputs_and_pose(contr)
-
-    cube_ranges = {
-        'x': {'min': pose['x'], 'max': pose['x']},
-        'y': {'min': pose['y'], 'max': pose['y']},
-        'z': {'min': pose['z'], 'max': pose['z']},
-        'yaw': {'min': pose['yaw'], 'max': pose['yaw']},
-        'pitch': {'min': pose['pitch'], 'max': pose['pitch']},
-        'roll': {'min': pose['roll'], 'max': pose['roll']}
-    }      
-
-    while(inputs['button'] == RANGE_SET_BUTTON):
-        debugstr = ''
-
-        inputs, pose = get_inputs_and_pose(contr)
-
-        if debug: debugstr = 'Range Set Mode: '
-        if debug: debugstr = debugstr + '\nPose: ' + str(pose)
-
-        if pose is not None:
-            for dim in pose:
-                if pose[dim] < cube_ranges[dim]['min']:
-                    cube_ranges[dim]['min'] = pose[dim]
-                elif pose[dim] > cube_ranges[dim]['max']:
-                    cube_ranges[dim]['max'] = pose[dim]
-
-            if debug: debugstr = debugstr + '\nRange: ' + str(cube_ranges)
-
-        sleep_time = WAIT_INTERVAL-(time.time()-start)
-        if sleep_time>0:
-            time.sleep(sleep_time)
-        
-        if debug:
-            #not working in anaconda prompt?
-            os.system('cls')
-            print(debugstr)
-
-    return cube_ranges
     
 def get_inputs_and_pose(contr):
     #Pose

@@ -1,3 +1,3 @@
 [submodule "triad_openvr"]
-	path = triad_openvr
+	path = openvr2midi/triad_openvr
 	url = https://github.com/aspitarl/triad_openvr

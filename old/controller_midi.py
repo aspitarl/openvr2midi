@@ -8,11 +8,11 @@ import random
 import argparse
 import os
 import signal
-from utils import curve_quad
+from openvr2midi.utils import curve_quad
 import numpy as np
 
-from utils import get_inputs_and_pose, scale_data
-from utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
+from openvr2midi.utils import get_inputs_and_pose, scale_data
+from openvr2midi.utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 #TODO: Figure out whether there should be different cc dicts for each controller (stress test 1 midi channel...)
 
@@ -61,6 +61,46 @@ direction_dict = {
 
 
 
+
+def range_set_mode(contr, debugstr=''):
+    inputs, pose = get_inputs_and_pose(contr)
+
+    cube_ranges = {
+        'x': {'min': pose['x'], 'max': pose['x']},
+        'y': {'min': pose['y'], 'max': pose['y']},
+        'z': {'min': pose['z'], 'max': pose['z']},
+        'yaw': {'min': pose['yaw'], 'max': pose['yaw']},
+        'pitch': {'min': pose['pitch'], 'max': pose['pitch']},
+        'roll': {'min': pose['roll'], 'max': pose['roll']}
+    }      
+
+    while(inputs['button'] == RANGE_SET_BUTTON):
+        debugstr = ''
+
+        inputs, pose = get_inputs_and_pose(contr)
+
+        if debug: debugstr = 'Range Set Mode: '
+        if debug: debugstr = debugstr + '\nPose: ' + str(pose)
+
+        if pose is not None:
+            for dim in pose:
+                if pose[dim] < cube_ranges[dim]['min']:
+                    cube_ranges[dim]['min'] = pose[dim]
+                elif pose[dim] > cube_ranges[dim]['max']:
+                    cube_ranges[dim]['max'] = pose[dim]
+
+            if debug: debugstr = debugstr + '\nRange: ' + str(cube_ranges)
+
+        sleep_time = WAIT_INTERVAL-(time.time()-start)
+        if sleep_time>0:
+            time.sleep(sleep_time)
+        
+        if debug:
+            #not working in anaconda prompt?
+            os.system('cls')
+            print(debugstr)
+
+    return cube_ranges
 
 
 if __name__ == '__main__':

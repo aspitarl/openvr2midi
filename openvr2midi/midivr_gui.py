@@ -90,6 +90,20 @@ class MainWidget(QtWidgets.QWidget):
 
         layout.addLayout(connect_hlayout)
 
+        # add a new layout for saving and loading settings with save and load buttons and a text box for the filename
+
+        self.save_load_layout = QHBoxLayout()
+        self.save_load_layout.addWidget(QLabel('Filename:'))
+        self.save_load_layout.addWidget(QLineEdit('ranges_dict_right'))
+        self.pushbutton_save = QPushButton('Save')
+        self.pushbutton_save.clicked.connect(lambda: self.save_cube_ranges(self.save_load_layout.itemAt(1).widget().text()))
+        self.save_load_layout.addWidget(self.pushbutton_save)
+        self.pushbutton_load = QPushButton('Load')
+        self.pushbutton_load.clicked.connect(lambda: self.load_cube_ranges(self.save_load_layout.itemAt(1).widget().text()))
+        self.save_load_layout.addWidget(self.pushbutton_load)
+        layout.addLayout(self.save_load_layout)
+
+
         # Signal selection and data thread 
         self.combobox_midichans.currentIndexChanged.connect(self.midi_channel_changed) #TODO: Hacky way of talking to signal select layout
         default_cc_dict = default_cc_dict_controllers[self.get_selected_controller_name()]
@@ -213,14 +227,23 @@ class MainWidget(QtWidgets.QWidget):
 
         self.checkbox_isconnected.setChecked(False)
 
-    def load_cube_ranges(self):
-        with open(os.path.join(settings_dir, 'ranges_dict_right.json'), 'r') as f:
+    def load_cube_ranges(self, filename='ranges_dict_right'):
+        filename = filename + '.json'
+        with open(os.path.join(settings_dir, filename), 'r') as f:
             self.cube_ranges = json.load(f)
         
         self.select_layout.update_range_widgets(self.cube_ranges)
         self.datathread.cube_ranges = self.cube_ranges
     
+    def save_cube_ranges(self, filename='ranges_dict_right'):
+        filename = filename + '.json'
+        # overwrite the existing file with a pretty formatted json
+        with open(os.path.join(settings_dir, filename), 'w') as f:
+            json.dump(self.cube_ranges, f, indent=4)
+
+    
     def update_cube_ranges(self, range_dict):
+        self.cube_ranges = range_dict
         self.select_layout.update_range_widgets(range_dict)
 
 from PyQt5.QtGui import QCloseEvent

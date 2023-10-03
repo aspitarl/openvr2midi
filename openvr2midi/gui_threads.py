@@ -51,7 +51,7 @@ class DataThread(QtCore.QThread):
                 inputs, pose = get_inputs_and_pose(self.contr)
 
                 if self.debug:
-                    debug_str = str(inputs) + '\n\n' + str(pose)
+                    debug_str = str(inputs) + '\n\n' + str(pose) + '\n\n' + str(self.cube_ranges)
                     self.debug_signal.emit(debug_str)
                     #TODO: how to remove this sleep here, can't figure out how to regulate handling of this signal in parent
                     time.sleep(1)

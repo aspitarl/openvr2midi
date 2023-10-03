@@ -1,7 +1,16 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets
-from controller_midi import default_enabled_dict
 
+default_enabled_dict = {
+    'x': True,
+    'y': True,
+    'z': True,
+    'yaw': True,
+    'pitch': False,
+    'roll': False,
+    'trigger':True,
+    # 'tpy':26,
+}
 
 class OSCLayout(QtWidgets.QVBoxLayout):
     def __init__(self, *args, **kwargs):

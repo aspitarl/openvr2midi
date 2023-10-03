@@ -3,8 +3,8 @@ import time
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-from controller_midi import get_inputs_and_pose, scale_data
-from controller_midi import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
+from utils import get_inputs_and_pose, scale_data
+from utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 import mido
 

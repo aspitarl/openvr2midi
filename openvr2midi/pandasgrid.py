@@ -53,24 +53,22 @@ class AlphaNumericValidator(QValidator):
             return QValidator.Invalid, input_str, pos
 
 class PandasGridLayout(QWidget):
-    def __init__(self, data, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self._data = data
-        # connect self._data to the model
 
+        default_filename = 'default'
 
-
-
-
-        self._grid_widget = PandasGridWidget(self._data)
         self._load_button = QPushButton("Load")
         self._load_button.clicked.connect(self.load_data)
         self._save_button = QPushButton("Save")
         self._save_button.clicked.connect(self.save_data)
         self._file_edit = QLineEdit()
         self._file_edit.setValidator(AlphaNumericValidator(self._file_edit))
-        self._file_edit.textChanged.connect(self.update_file_label)
-        self._file_edit.setText("default")
+        self._file_edit.setText(default_filename)
+
+        df_initial = pd.read_csv('settings/' + default_filename + ".csv")
+        self._grid_widget = PandasGridWidget(df_initial)
+
         self._button_layout = QHBoxLayout()
         self._button_layout.addWidget(self._load_button)
         self._button_layout.addWidget(self._save_button)
@@ -84,6 +82,7 @@ class PandasGridLayout(QWidget):
         file_path = 'settings/' + self._file_edit.text() + ".csv"
         if file_path:
             print(file_path)
+            self._data = self._grid_widget._data
             self._data.to_csv(file_path, index=False)
 
     def load_data(self):
@@ -92,22 +91,14 @@ class PandasGridLayout(QWidget):
             self._data = pd.read_csv(file_path)
             self._grid_widget.set_data(self._data)
 
-    def update_file_label(self, text):
-        self._file_edit.setText(text)
 
-    def set_data(self, data):
-        self._data = data
-        self._grid_widget.set_data(self._data)
-
-    def get_data(self):
-        return self._data
 
 
 class PandasGridWidget(QWidget):
     def __init__(self, data, parent=None):
         super().__init__(parent)
-        self._data = data
-        self._table_model = PandasTableModel(self._data)
+
+        self._table_model = PandasTableModel(data)
         self._grid_layout = QGridLayout()
         self._widgets = []
         self._widget_types = {
@@ -123,13 +114,14 @@ class PandasGridWidget(QWidget):
         self.setLayout(self._grid_layout)
 
     def _load_data(self):
-        for i, col in enumerate(self._data.columns):
+        data = self._table_model._data
+        for i, col in enumerate(data.columns):
             label = QLabel(col)
             self._grid_layout.addWidget(label, 0, i)
 
 
-            for j, val in enumerate(self._data[col]):
-                widget_type = self._widget_types[str(self._data.dtypes[col])]
+            for j, val in enumerate(data[col]):
+                widget_type = self._widget_types[str(data.dtypes[col])]
                 widget = widget_type()
                 widget = set_value_widget_type(widget, val)
                 signal = get_widget_change_signal(widget)
@@ -141,17 +133,17 @@ class PandasGridWidget(QWidget):
 
 
     def set_data(self, data):
-        self._data = data
+        self._table_model._data = data
         self._load_data()
 
 
     def _disable_send_checkboxes(self, state, row):
 
         send_checkbox_column = 2
-        widget_offset = send_checkbox_column*len(self._data.columns)
+        widget_offset = send_checkbox_column*len(self._table_model._data.columns)
         if state == Qt.Checked:
             self.presolo_send_states = []
-            for i in range(len(self._data)):
+            for i in range(len(self._table_model._data)):
                 if i != row:
                     send_widget = self._widgets[i+widget_offset]
                     self.presolo_send_states.append((i, send_widget.isChecked(), send_widget.isEnabled()))
@@ -201,7 +193,6 @@ def set_value_widget_type(widget, value):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    data = pd.read_csv("settings/default.csv")
-    widget = PandasGridLayout(data)
+    widget = PandasGridLayout()
     widget.show()
     sys.exit(app.exec_())

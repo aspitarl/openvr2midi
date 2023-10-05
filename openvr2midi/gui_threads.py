@@ -16,17 +16,16 @@ class DataThread(QtCore.QThread):
     data_obtained = QtCore.pyqtSignal(object, object)
     debug_signal = QtCore.pyqtSignal(str)
 
-    cube_ranges_update_signal = QtCore.pyqtSignal(dict)
-
-    def __init__(self):
+    def __init__(self, table_model, *args, **kwargs):
         QtCore.QThread.__init__(self)
-        self.data = []
+        self._table_model = table_model
+        self.update_dicts()
+        self._table_model.dataChanged.connect(self.update_dicts)
+
         self._isRunning = False
 
         #TODO: these are overwritten with references after initializing instance in the 'containing' class. This is just here to throw errors if that doesn't work. can they be accessed without doing this? 
         self.contr = None
-        self.cc_dict = None
-        self.cube_ranges = None
         self.midiout = None
 
         self.debug_console = None
@@ -37,6 +36,23 @@ class DataThread(QtCore.QThread):
         self.enable_half_y = True
         self.OSC_client = None
         self.enable_haptic = True
+
+    def update_dicts(self):
+        df_table = self._table_model._data
+        self.cc_dict = dict(zip(df_table['dim'], df_table['CC']))
+
+        self.cube_ranges = {   
+            dim: {'min': df_table['min_range'][i], 'max': df_table['max_range'][i]} for i, dim in enumerate(df_table['dim'])
+        }
+
+
+    def update_table_model_cube_ranges(self):
+        df_table = self._table_model._data
+        for i, dim in enumerate(self.cube_ranges):
+            df_table.loc[i, 'min_range'] = self.cube_ranges[dim]['min']
+            df_table.loc[i, 'max_range'] = self.cube_ranges[dim]['max']
+
+        self._table_model.set_new_data(df_table)
 
     def run(self):
         """Long-running task."""
@@ -60,7 +76,7 @@ class DataThread(QtCore.QThread):
                 if inputs['button'] == RANGE_SET_BUTTON and pose != None:
                     #enter range set mode
                     self.range_set_mode(self.contr)
-                    self.cube_ranges_update_signal.emit(self.cube_ranges)
+                    self.update_table_model_cube_ranges()
 
                 if pose is not None:   
                     if inputs['trackpad_touched']:                    

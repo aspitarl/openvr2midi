@@ -1,6 +1,6 @@
 import sys
 import pandas as pd
-from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableView, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QFileDialog, QGridLayout, QLabel, QSpinBox, QLineEdit, QComboBox, QCheckBox, QDateEdit, QDateTimeEdit, QTimeEdit, QDoubleSpinBox
 
 # missing imports
@@ -8,6 +8,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTableView, QHeaderView, 
 from PyQt5.QtGui import QValidator
 
 class PandasTableModel(QAbstractTableModel):
+
+    _new_data = pyqtSignal(object) # this is a separate signal for when the data is changed from outside the model
+
     def __init__(self, data, parent=None):
         super().__init__(parent)
         self._data = data
@@ -44,6 +47,10 @@ class PandasTableModel(QAbstractTableModel):
 
     def flags(self, index):
         return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        
+    def set_new_data(self, data):
+        self._data = data
+        self._new_data.emit(data)
 
 class AlphaNumericValidator(QValidator):
     def validate(self, input_str, pos):
@@ -52,7 +59,7 @@ class AlphaNumericValidator(QValidator):
         else:
             return QValidator.Invalid, input_str, pos
 
-class PandasGridLayout(QWidget):
+class PandasGridLayout(QVBoxLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -76,7 +83,7 @@ class PandasGridLayout(QWidget):
         self._layout = QVBoxLayout()
         self._layout.addWidget(self._grid_widget)
         self._layout.addLayout(self._button_layout)
-        self.setLayout(self._layout)
+        self.addLayout(self._layout)
 
     def save_data(self):
         file_path = 'settings/' + self._file_edit.text() + ".csv"
@@ -107,6 +114,7 @@ class PandasGridWidget(QWidget):
         self._current_solo_checkbox = None
 
         self._table_model = PandasTableModel(data)
+        self._table_model._new_data.connect(self._load_data)
         self._grid_layout = QGridLayout()
         self._widgets = []
         self._widget_types = {
@@ -132,11 +140,19 @@ class PandasGridWidget(QWidget):
             for j, val in enumerate(data[col]):
                 widget_type = self._widget_types[str(data.dtypes[col])]
                 widget = widget_type()
+
+                if widget_type == QDoubleSpinBox:
+                    widget.setDecimals(2)
+                    widget.setSingleStep(0.1)
+                    widget.setMaximum(999.99)
+                    widget.setMinimum(-999.99)
+
                 widget = set_value_widget_type(widget, val)
                 signal = get_widget_change_signal(widget)
                 signal.connect(lambda value, i=i, j=j: self._table_model.setData(self._table_model.index(j, i), value, Qt.EditRole))
                 if col == 'solo':
                     widget.stateChanged.connect(lambda state, row=j: self._disable_send_checkboxes(state, row))
+
                 self._grid_layout.addWidget(widget, j+1, i)
                 self._widgets.append(widget)
 
@@ -169,8 +185,6 @@ class PandasGridWidget(QWidget):
     def set_data(self, data):
         self._table_model._data = data
         self._load_data()
-
-
               
 
 

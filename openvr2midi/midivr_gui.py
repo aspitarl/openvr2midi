@@ -12,7 +12,9 @@ from pythonosc import udp_client
 
 from triad_openvr import triad_openvr
 from gui_threads import DataThread
-from gui_layouts import SignalSelectLayout, OSCLayout
+from gui_layouts import  OSCLayout
+
+from pandasgrid import PandasGridLayout
 
 default_cc_dict_controllers = {
     'Right Controller' : {
@@ -50,8 +52,7 @@ class MainWidget(QtWidgets.QWidget):
 
         layout = QVBoxLayout()
 
-        #Thread for obtaining and sending out data
-        self.datathread = DataThread()
+
 
         #OpenVR layout
         openvr_hlayout = QHBoxLayout()
@@ -90,35 +91,23 @@ class MainWidget(QtWidgets.QWidget):
 
         layout.addLayout(connect_hlayout)
 
-        # add a new layout for saving and loading settings with save and load buttons and a text box for the filename
-
-        self.save_load_layout = QHBoxLayout()
-        self.save_load_layout.addWidget(QLabel('Filename:'))
-        self.save_load_layout.addWidget(QLineEdit('ranges_dict_right'))
-        self.pushbutton_save = QPushButton('Save')
-        self.pushbutton_save.clicked.connect(lambda: self.save_cube_ranges(self.save_load_layout.itemAt(1).widget().text()))
-        self.save_load_layout.addWidget(self.pushbutton_save)
-        self.pushbutton_load = QPushButton('Load')
-        self.pushbutton_load.clicked.connect(lambda: self.load_cube_ranges(self.save_load_layout.itemAt(1).widget().text()))
-        self.save_load_layout.addWidget(self.pushbutton_load)
-        layout.addLayout(self.save_load_layout)
-
-
-        # Signal selection and data thread 
         self.combobox_midichans.currentIndexChanged.connect(self.midi_channel_changed) #TODO: Hacky way of talking to signal select layout
-        default_cc_dict = default_cc_dict_controllers[self.get_selected_controller_name()]
-        self.select_layout = SignalSelectLayout(default_cc_dict)
+
+        # # Signal selection and data thread 
+
+        # TODO: save settings for each controller and load them when selected, was previously done with midi_channel_changed
+        # default_cc_dict = default_cc_dict_controllers[self.get_selected_controller_name()]
+        self.select_layout = PandasGridLayout()
         layout.addLayout(self.select_layout)
+
+        #Thread for obtaining and sending out data
+        self.datathread = DataThread(table_model=self.select_layout._grid_widget._table_model)
 
         self.OSC_layout = OSCLayout()
         layout.addLayout(self.OSC_layout)
         self.OSC_layout.enable_OSC.setChecked(False)
         self.OSC_layout.enable_OSC.stateChanged.connect(self.enable_disable_OSC)
 
-        #TODO: don't pass cc_dict reference? Could we replace this with a data model? See select_layout. https://stackoverflow.com/questions/21857935/pyqt-segmentation-fault-sometimes
-        # also, datathread splits data into two dictionaries....
-        self.datathread.cc_dict = self.select_layout.cc_dict
-        self.datathread.cube_ranges_update_signal.connect(self.update_cube_ranges)
 
         #TODO: these also are janky data communications between mainwidget and thread, like signal select layout. 
         self.checkbox_ymode = QCheckBox('Enable Half Y mode')
@@ -141,8 +130,6 @@ class MainWidget(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
-        self.load_cube_ranges()
-
     def get_selected_controller_name(self):
         # The midi port seems to have random numbers at the end, so just extract the name to use in dicts etc.
         current_midi_chan = self.combobox_midichans.currentText()
@@ -151,12 +138,6 @@ class MainWidget(QtWidgets.QWidget):
         return contr_name
 
     def midi_channel_changed(self):
-        #TODO: move this combobox within signal select layout? 
-        
-        contr_name = self.get_selected_controller_name()
-        cc_dict = default_cc_dict_controllers[contr_name]
-        self.select_layout.set_cc_vals(cc_dict)
-
         self.midi_channel_changed_signal.emit() # To tell the main window to update the title
 
     #TODO: These functions probably can be replaced by lambda, but also would be fixed by using a data model
@@ -227,24 +208,6 @@ class MainWidget(QtWidgets.QWidget):
 
         self.checkbox_isconnected.setChecked(False)
 
-    def load_cube_ranges(self, filename='ranges_dict_right'):
-        filename = filename + '.json'
-        with open(os.path.join(settings_dir, filename), 'r') as f:
-            self.cube_ranges = json.load(f)
-        
-        self.select_layout.update_range_widgets(self.cube_ranges)
-        self.datathread.cube_ranges = self.cube_ranges
-    
-    def save_cube_ranges(self, filename='ranges_dict_right'):
-        filename = filename + '.json'
-        # overwrite the existing file with a pretty formatted json
-        with open(os.path.join(settings_dir, filename), 'w') as f:
-            json.dump(self.cube_ranges, f, indent=4)
-
-    
-    def update_cube_ranges(self, range_dict):
-        self.cube_ranges = range_dict
-        self.select_layout.update_range_widgets(range_dict)
 
 from PyQt5.QtGui import QCloseEvent
 

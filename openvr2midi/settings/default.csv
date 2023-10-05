@@ -1,8 +1,8 @@
 dim,CC,send,solo,min_range,max_range,invert
-x,25,False,False,0.0,1.0,False
-y,23,True,True,0.0,1.0,False
-z,24,False,False,0.0,1.0,False
-roll,24,False,False,0.0,1.0,False
-pitch,26,False,False,0.0,1.0,False
-yaw,27,False,False,0.0,1.0,False
-trigger,28,False,False,0.0,1.0,False
+x,22,True,False,-1.945542335510254,-1.4000000000000004,False
+y,23,True,False,-0.7000000000000001,-0.40000000000000013,False
+z,24,True,False,-0.35666990280151367,0.11679601669311523,False
+roll,25,True,False,164.5975632465117,212.16987772831425,False
+pitch,26,True,False,111.66059003484776,208.69044284349505,False
+yaw,27,True,False,162.34627094971503,193.8087825745453,False
+trigger,28,True,False,0.0,1.0,False

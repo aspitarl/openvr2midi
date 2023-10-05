@@ -39,10 +39,11 @@ class DataThread(QtCore.QThread):
 
     def update_dicts(self):
         df_table = self._table_model._data
+        df_table = df_table[df_table['send'].astype(bool) == True]
         self.cc_dict = dict(zip(df_table['dim'], df_table['CC']))
 
         self.cube_ranges = {   
-            dim: {'min': df_table['min_range'][i], 'max': df_table['max_range'][i]} for i, dim in enumerate(df_table['dim'])
+            row['dim']: {'min': df_table['min_range'][idx], 'max': df_table['max_range'][idx]} for idx, row in df_table.iterrows()
         }
 
 

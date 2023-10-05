@@ -149,7 +149,12 @@ class PandasGridWidget(QWidget):
 
                 widget = set_value_widget_type(widget, val)
                 signal = get_widget_change_signal(widget)
-                signal.connect(lambda value, i=i, j=j: self._table_model.setData(self._table_model.index(j, i), value, Qt.EditRole))
+
+                if widget_type == QCheckBox:
+                    signal.connect(lambda state, i=i, j=j: self._table_model.setData(self._table_model.index(j, i), bool(state), Qt.EditRole))
+                else:
+                    signal.connect(lambda value, i=i, j=j: self._table_model.setData(self._table_model.index(j, i), value, Qt.EditRole))
+
                 if col == 'solo':
                     widget.stateChanged.connect(lambda state, row=j: self._disable_send_checkboxes(state, row))
 

@@ -1,0 +1,8 @@
+dim,CC,send,solo,min_range,max_range,invert
+x,25,False,False,0.0,1.0,False
+y,23,True,True,0.0,1.0,False
+z,24,False,False,0.0,1.0,False
+roll,24,False,False,0.0,1.0,False
+pitch,26,False,False,0.0,1.0,False
+yaw,27,False,False,0.0,1.0,False
+trigger,28,False,False,0.0,1.0,False

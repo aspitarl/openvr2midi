@@ -81,8 +81,13 @@ class PandasGridLayout(QWidget):
     def save_data(self):
         file_path = 'settings/' + self._file_edit.text() + ".csv"
         if file_path:
-            print(file_path)
-            self._data = self._grid_widget._data
+            self._data = self._grid_widget._table_model._data
+
+            # Make sure the solor and send data columns are bools
+
+            self._data['solo'] = self._data['solo'].astype(bool)
+            self._data['send'] = self._data['send'].astype(bool)
+
             self._data.to_csv(file_path, index=False)
 
     def load_data(self):
@@ -97,6 +102,9 @@ class PandasGridLayout(QWidget):
 class PandasGridWidget(QWidget):
     def __init__(self, data, parent=None):
         super().__init__(parent)
+
+        
+        self._current_solo_checkbox = None
 
         self._table_model = PandasTableModel(data)
         self._grid_layout = QGridLayout()
@@ -114,6 +122,7 @@ class PandasGridWidget(QWidget):
         self.setLayout(self._grid_layout)
 
     def _load_data(self):
+        self._widgets = []
         data = self._table_model._data
         for i, col in enumerate(data.columns):
             label = QLabel(col)
@@ -131,29 +140,38 @@ class PandasGridWidget(QWidget):
                 self._grid_layout.addWidget(widget, j+1, i)
                 self._widgets.append(widget)
 
+    def _disable_send_checkboxes(self, state, row):
+        send_checkbox_column = 2
+        send_column_offset = send_checkbox_column*len(self._table_model._data.columns)
+
+        solo_checkbox_column = 3
+        solo_column_offset = solo_checkbox_column*len(self._table_model._data.columns)
+        if state == Qt.Checked:
+            if self._current_solo_checkbox is not None:
+                self._current_solo_checkbox.setChecked(False)
+            self._current_solo_checkbox = self._widgets[row+solo_column_offset]
+
+            self.presolo_send_states = []
+            for i in range(len(self._table_model._data)):
+                if i != row:
+                    send_widget = self._widgets[i+send_column_offset]
+                    self.presolo_send_states.append((i, send_widget.isChecked(), send_widget.isEnabled()))
+                    send_widget.setChecked(False)
+                    send_widget.setEnabled(False)
+        else:
+            self._current_solo_checkbox = None
+            for i, checked, enabled in self.presolo_send_states:
+                send_widget = self._widgets[i+send_column_offset]
+                send_widget.setEnabled(enabled)
+                send_widget.setChecked(checked)
+
 
     def set_data(self, data):
         self._table_model._data = data
         self._load_data()
 
 
-    def _disable_send_checkboxes(self, state, row):
-
-        send_checkbox_column = 2
-        widget_offset = send_checkbox_column*len(self._table_model._data.columns)
-        if state == Qt.Checked:
-            self.presolo_send_states = []
-            for i in range(len(self._table_model._data)):
-                if i != row:
-                    send_widget = self._widgets[i+widget_offset]
-                    self.presolo_send_states.append((i, send_widget.isChecked(), send_widget.isEnabled()))
-                    send_widget.setChecked(False)
-                    send_widget.setEnabled(False)
-        else:
-            for i, checked, enabled in self.presolo_send_states:
-                send_widget = self._widgets[i+widget_offset]
-                send_widget.setEnabled(enabled)
-                send_widget.setChecked(checked)                    
+              
 
 
 

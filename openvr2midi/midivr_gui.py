@@ -108,17 +108,36 @@ class MainWidget(QtWidgets.QWidget):
         self.OSC_layout.enable_OSC.setChecked(False)
         self.OSC_layout.enable_OSC.stateChanged.connect(self.enable_disable_OSC)
 
+        # Extra settings
 
         #TODO: these also are janky data communications between mainwidget and thread, like signal select layout. 
         self.checkbox_ymode = QCheckBox('Enable Half Y mode')
         self.checkbox_ymode.setChecked(self.datathread.enable_half_y)
         self.checkbox_ymode.stateChanged.connect(self.enable_disable_ymode)
-        layout.addWidget(self.checkbox_ymode)
 
         self.checkbox_debug = QCheckBox('Enable Debugging')
         self.checkbox_debug.setChecked(False)
         self.checkbox_debug.stateChanged.connect(self.enable_debug)
-        layout.addWidget(self.checkbox_debug)
+
+        # make a two checkboxes that set the yaw x and y factors to 1 or -1 depending on the state of the checkbox, setting the yaw_x_factor and yaw_y_factor variables in the data thread
+
+        self.checkbox_yaw_x_factor = QCheckBox('Invert Yaw X')
+        self.checkbox_yaw_x_factor.setChecked(False)
+        self.checkbox_yaw_x_factor.stateChanged.connect(lambda: setattr(self.datathread, 'yaw_x_factor', -1 if self.checkbox_yaw_x_factor.isChecked() else 1))
+
+        self.checkbox_yaw_y_factor = QCheckBox('Invert Yaw Y')
+        self.checkbox_yaw_y_factor.setChecked(False)
+        self.checkbox_yaw_y_factor.stateChanged.connect(lambda: setattr(self.datathread, 'yaw_y_factor', -1 if self.checkbox_yaw_y_factor.isChecked() else 1))
+
+        # make a grid layout for all extra settings checkboxes and add it to the main layout
+
+        extra_settings_layout = QGridLayout()
+        extra_settings_layout.addWidget(self.checkbox_ymode, 0, 0)
+        extra_settings_layout.addWidget(self.checkbox_debug, 0, 1)
+        extra_settings_layout.addWidget(self.checkbox_yaw_x_factor, 1, 0)
+        extra_settings_layout.addWidget(self.checkbox_yaw_y_factor, 1, 1)
+
+        layout.addLayout(extra_settings_layout)
 
         # Debug Console
         self.debug_console = QTextEdit()

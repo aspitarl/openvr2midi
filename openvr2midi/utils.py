@@ -55,9 +55,9 @@ def scale_data(data_raw, cube_ranges, dim, half):
 
 
     
-def get_inputs_and_pose(contr):
+def get_inputs_and_pose(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
     #Pose
-    positionarray = contr.get_pose_euler()
+    positionarray = contr.get_pose_euler(yaw_x_factor=yaw_x_factor, yaw_y_factor=yaw_y_factor)
 
     if positionarray == None:
         pose = None

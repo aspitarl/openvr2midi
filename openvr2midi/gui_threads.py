@@ -8,7 +8,7 @@ from utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 import mido
 
-
+import debugpy
 
 class DataThread(QtCore.QThread):
     # https://stackoverflow.com/questions/9957195/updating-gui-elements-in-multithreaded-pyqt
@@ -37,6 +37,9 @@ class DataThread(QtCore.QThread):
         self.OSC_client = None
         self.enable_haptic = True
 
+        self.yaw_y_factor = 1.0
+        self.yaw_x_factor = 1.0
+
     def update_dicts(self):
         df_table = self._table_model._data
         df_table = df_table[df_table['send'].astype(bool) == True]
@@ -58,6 +61,8 @@ class DataThread(QtCore.QThread):
     def run(self):
         """Long-running task."""
 
+        # debugpy.debug_this_thread()
+
         if self.contr:
             haptic_loop_counter = 0
             self._isRunning = True
@@ -65,7 +70,7 @@ class DataThread(QtCore.QThread):
                 if self.enable_haptic: haptic_loop_counter += 1
                 start = time.time()
                 
-                inputs, pose = get_inputs_and_pose(self.contr)
+                inputs, pose = get_inputs_and_pose(self.contr, self.yaw_x_factor, self.yaw_y_factor)
 
                 if self.debug:
                     debug_str = str(inputs) + '\n\n' + str(pose) + '\n\n' + str(self.cube_ranges)
@@ -123,7 +128,7 @@ class DataThread(QtCore.QThread):
         self.debug_signal.emit("entering range set mode")
         start = time.time()
 
-        inputs, pose = get_inputs_and_pose(contr)
+        inputs, pose = get_inputs_and_pose(contr, self.yaw_x_factor, self.yaw_y_factor)
 
         self.cube_ranges = {
             'x': {'min': pose['x'], 'max': pose['x']},
@@ -136,7 +141,7 @@ class DataThread(QtCore.QThread):
 
         while(inputs['button'] == RANGE_SET_BUTTON):
 
-            inputs, pose = get_inputs_and_pose(contr)
+            inputs, pose = get_inputs_and_pose(contr, self.yaw_x_factor, self.yaw_y_factor)
 
             if pose is not None:
                 for dim in pose:

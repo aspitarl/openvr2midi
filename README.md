@@ -4,9 +4,10 @@ Simple tool to pull controller coordinates with openvr and send them as midi dat
 
 ## Installation
 
-`conda env create -f environment.yml`
+`pip install -r requirements.txt`
 
-`git submodule init`
+# Overview
 
-`git submodule update`
+`steamvr_config_utils/quickswitch_steamvr.py` is a script to quickly change the configuration of steamvr between configurations as created with `new_config.py`. e.g. `python quickswitch_steamvr.py no_hmd` to switch to no_hmd mode. 
 
+`openvr2midi/midivr_gui.py` is the main program. 

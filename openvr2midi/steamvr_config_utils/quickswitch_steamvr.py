@@ -4,6 +4,8 @@ import os
 import argparse
 
 config_folders_path = r'VR Config Shortcuts'
+config_folders_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_folders_path)
+
 choices = [f for f in os.listdir(config_folders_path) if os.path.isdir(os.path.join(config_folders_path,f))]
 
 print(choices)

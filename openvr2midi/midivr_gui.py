@@ -3,8 +3,10 @@ from PyQt5.QtGui import QIntValidator, QGuiApplication
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QValidator
 import sys
 import os
+import pandas as pd
 
 import mido
 import json
@@ -14,7 +16,7 @@ from triad_openvr import triad_openvr
 from gui_threads import DataThread
 from gui_layouts import  OSCLayout
 
-from pandasgrid import PandasGridLayout
+from pandasgrid import PandasGridWidget
 
 default_cc_dict_controllers = {
     'Right Controller' : {
@@ -38,6 +40,12 @@ default_cc_dict_controllers = {
 }
 
 
+class AlphaNumericValidator(QValidator):
+    def validate(self, input_str, pos):
+        if input_str.isalnum():
+            return QValidator.Acceptable, input_str, pos
+        else:
+            return QValidator.Invalid, input_str, pos
 
 settings_dir = 'settings/'
 
@@ -93,15 +101,41 @@ class MainWidget(QtWidgets.QWidget):
 
         self.combobox_midichans.currentIndexChanged.connect(self.midi_channel_changed) #TODO: Hacky way of talking to signal select layout
 
+        # settings saving
+        # TODO: save settings for each controller and load them when selected, was previously done with midi_channel_changed
+
+        self.settings_layout = QHBoxLayout()
+
+        self._load_button = QPushButton("Load")
+        self._load_button.clicked.connect(self.load_data)
+        self._save_button = QPushButton("Save")
+        self._save_button.clicked.connect(self.save_data)
+
+        self._fileselect_combo = QComboBox()
+        # Add all files in the settings directory to the combo box
+        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.csv')])
+        self._fileselect_combo.currentIndexChanged.connect(self.update_line_edit)
+
+        self._new_filename_line_edit = QLineEdit()
+        self._new_filename_line_edit.setValidator(AlphaNumericValidator(self._new_filename_line_edit))
+        self.update_line_edit(0)
         # # Signal selection and data thread 
 
-        # TODO: save settings for each controller and load them when selected, was previously done with midi_channel_changed
-        # default_cc_dict = default_cc_dict_controllers[self.get_selected_controller_name()]
-        self.select_layout = PandasGridLayout()
-        layout.addLayout(self.select_layout)
+        self.settings_layout.addWidget(self._fileselect_combo)
+        self.settings_layout.addWidget(self._load_button)
+        self.settings_layout.addWidget(self._save_button)
+        self.settings_layout.addWidget(self._new_filename_line_edit)
+
+        layout.addLayout(self.settings_layout)
+
+        # use first file in settings directory as default 
+        df_initial = pd.read_csv('settings/' + self._fileselect_combo.currentText() + ".csv")
+        self.CC_grid_widget = PandasGridWidget(df_initial)
+
+        layout.addWidget(self.CC_grid_widget)
 
         #Thread for obtaining and sending out data
-        self.datathread = DataThread(table_model=self.select_layout._grid_widget._table_model)
+        self.datathread = DataThread(table_model=self.CC_grid_widget._table_model)
 
         self.OSC_layout = OSCLayout()
         layout.addLayout(self.OSC_layout)
@@ -226,6 +260,32 @@ class MainWidget(QtWidgets.QWidget):
         self.datathread.stop()
 
         self.checkbox_isconnected.setChecked(False)
+
+    def save_data(self):
+        file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
+        if file_path:
+            self._data = self.CC_grid_widget._table_model._data
+
+            # Make sure the solor and send data columns are bools
+
+            self._data['solo'] = self._data['solo'].astype(bool)
+            self._data['send'] = self._data['send'].astype(bool)
+
+            self._data.to_csv(file_path, index=False)
+
+    def load_data(self):
+        # file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
+        file_path = 'settings/' + self._fileselect_combo.currentText() + ".csv"
+
+        if file_path:
+            self._data = pd.read_csv(file_path)
+            self.CC_grid_widget.set_data(self._data)
+
+    def update_line_edit(self, index):
+        # Get the current text in the combo box
+        current_text = self._fileselect_combo.itemText(index)
+        # Set the text in the line edit
+        self._new_filename_line_edit.setText(current_text)
 
 
 from PyQt5.QtGui import QCloseEvent

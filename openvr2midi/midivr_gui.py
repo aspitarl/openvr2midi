@@ -40,7 +40,6 @@ default_cc_dict_controllers = {
     }
 }
 
-
 class AlphaNumericValidator(QValidator):
     def validate(self, input_str, pos):
         if input_str.isalnum():
@@ -114,7 +113,7 @@ class MainWidget(QtWidgets.QWidget):
 
         self._fileselect_combo = QComboBox()
         # Add all files in the settings directory to the combo box
-        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.csv')])
+        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.json')])
         self._fileselect_combo.currentIndexChanged.connect(self.update_line_edit)
 
         self._new_filename_line_edit = QLineEdit()
@@ -129,8 +128,15 @@ class MainWidget(QtWidgets.QWidget):
 
         layout.addLayout(self.settings_layout)
 
+        file_path = 'settings/' + self._fileselect_combo.currentText() + ".json"
+        # Read the settings dictionary from the JSON file
+        with open(file_path, 'r') as f:
+            settings = json.load(f)
+
+        # Convert the DataFrame JSON string to a DataFrame
+        # df_initial = pd.read_json(settings['dataframe'], orient='split')
+        df_initial = pd.DataFrame(settings['dataframe'])
         # use first file in settings directory as default 
-        df_initial = pd.read_csv('settings/' + self._fileselect_combo.currentText() + ".csv")
         self.CC_grid_widget = PandasGridWidget(df_initial)
 
         layout.addWidget(self.CC_grid_widget)
@@ -272,11 +278,11 @@ class MainWidget(QtWidgets.QWidget):
             self._data['send'] = self._data['send'].astype(bool)
 
             # Convert the DataFrame to a JSON string
-            df_json = self._data.to_json(orient='split')
+            df_dict = self._data.to_dict('records')
 
             # Create a settings dictionary
             settings = {
-                'dataframe': df_json,
+                'dataframe': df_dict,
                 'half_y_mode': self.checkbox_ymode.isChecked(),
                 'yaw_x_factor': self.checkbox_yaw_x_factor.isChecked(),
                 'yaw_y_factor': self.checkbox_yaw_y_factor.isChecked(),
@@ -284,20 +290,19 @@ class MainWidget(QtWidgets.QWidget):
 
             # Write the settings dictionary to the JSON file
             with open(file_path, 'w') as f:
-                json.dump(settings, f)
+                json.dump(settings, f, indent=4)
 
     def load_data(self):
         file_path = 'settings/' + self._fileselect_combo.currentText() + ".json"
         if os.path.exists(file_path):
+
             # Read the settings dictionary from the JSON file
             with open(file_path, 'r') as f:
                 settings = json.load(f)
 
-            # Get the DataFrame JSON string from the settings dictionary
-            df_json = settings['dataframe']
-
             # Convert the DataFrame JSON string to a DataFrame
-            self._data = pd.read_json(df_json, orient='split')
+            self._data = pd.DataFrame(settings['dataframe'])
+            # self._data = pd.read_json(settings['dataframe'], orient='split')
 
             # Load the DataFrame into the grid widget
             self.CC_grid_widget.set_data(self._data)

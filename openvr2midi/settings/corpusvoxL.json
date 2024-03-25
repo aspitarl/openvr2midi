@@ -1,0 +1,6 @@
+{
+    "dataframe": "{\"columns\":[\"dim\",\"CC\",\"send\",\"solo\",\"min_range\",\"max_range\",\"invert\"],\"index\":[0,1,2,3,4,5,6],\"data\":[[\"x\",32,true,false,-0.961294651,0.478613019,false],[\"y\",33,true,false,1.3268102407,1.6905566454,false],[\"z\",34,true,false,-2.0980193615,-1.9778740406,false],[\"roll\",35,true,false,180.1239541648,282.2324796719,false],[\"pitch\",36,true,false,158.5423749902,319.8190521118,false],[\"yaw\",37,true,false,189.0813055674,224.0087383594,false],[\"trigger\",38,true,false,0.0,1.0,false]]}",
+    "half_y_mode": true,
+    "yaw_x_factor": false,
+    "yaw_y_factor": false
+}

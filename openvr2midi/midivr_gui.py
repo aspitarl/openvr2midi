@@ -7,6 +7,7 @@ from PyQt5.QtGui import QValidator
 import sys
 import os
 import pandas as pd
+import json
 
 import mido
 import json
@@ -262,24 +263,49 @@ class MainWidget(QtWidgets.QWidget):
         self.checkbox_isconnected.setChecked(False)
 
     def save_data(self):
-        file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
+        file_path = 'settings/' + self._new_filename_line_edit.text() + ".json"
         if file_path:
             self._data = self.CC_grid_widget._table_model._data
 
             # Make sure the solor and send data columns are bools
-
             self._data['solo'] = self._data['solo'].astype(bool)
             self._data['send'] = self._data['send'].astype(bool)
 
-            self._data.to_csv(file_path, index=False)
+            # Convert the DataFrame to a JSON string
+            df_json = self._data.to_json(orient='split')
+
+            # Create a settings dictionary
+            settings = {
+                'dataframe': df_json,
+                'half_y_mode': self.checkbox_ymode.isChecked(),
+                'yaw_x_factor': self.checkbox_yaw_x_factor.isChecked(),
+                'yaw_y_factor': self.checkbox_yaw_y_factor.isChecked(),
+            }
+
+            # Write the settings dictionary to the JSON file
+            with open(file_path, 'w') as f:
+                json.dump(settings, f)
 
     def load_data(self):
-        # file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
-        file_path = 'settings/' + self._fileselect_combo.currentText() + ".csv"
+        file_path = 'settings/' + self._fileselect_combo.currentText() + ".json"
+        if os.path.exists(file_path):
+            # Read the settings dictionary from the JSON file
+            with open(file_path, 'r') as f:
+                settings = json.load(f)
 
-        if file_path:
-            self._data = pd.read_csv(file_path)
+            # Get the DataFrame JSON string from the settings dictionary
+            df_json = settings['dataframe']
+
+            # Convert the DataFrame JSON string to a DataFrame
+            self._data = pd.read_json(df_json, orient='split')
+
+            # Load the DataFrame into the grid widget
             self.CC_grid_widget.set_data(self._data)
+
+            # # Load the other settings
+            self.checkbox_ymode.setChecked(settings['half_y_mode'])
+            self.checkbox_yaw_x_factor.setChecked(settings['yaw_x_factor'])
+            self.checkbox_yaw_y_factor.setChecked(settings['yaw_y_factor'])
 
     def update_line_edit(self, index):
         # Get the current text in the combo box

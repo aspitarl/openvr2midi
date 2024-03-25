@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableView, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QFileDialog, QGridLayout, QLabel, QSpinBox, QLineEdit, QComboBox, QCheckBox, QDateEdit, QDateTimeEdit, QTimeEdit, QDoubleSpinBox
+import os
 
 # missing imports
 
@@ -69,24 +70,31 @@ class PandasGridLayout(QVBoxLayout):
         self._load_button.clicked.connect(self.load_data)
         self._save_button = QPushButton("Save")
         self._save_button.clicked.connect(self.save_data)
-        self._file_edit = QLineEdit()
-        self._file_edit.setValidator(AlphaNumericValidator(self._file_edit))
-        self._file_edit.setText(default_filename)
+
+        self._fileselect_combo = QComboBox()
+        # Add all files in the settings directory to the combo box
+        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.csv')])
+        self._fileselect_combo.currentIndexChanged.connect(self.update_line_edit)
+
+        self._new_filename_line_edit = QLineEdit()
+        self._new_filename_line_edit.setValidator(AlphaNumericValidator(self._new_filename_line_edit))
+        self.update_line_edit(0)
 
         df_initial = pd.read_csv('settings/' + default_filename + ".csv")
         self._grid_widget = PandasGridWidget(df_initial)
 
         self._button_layout = QHBoxLayout()
+        self._button_layout.addWidget(self._fileselect_combo)
         self._button_layout.addWidget(self._load_button)
         self._button_layout.addWidget(self._save_button)
-        self._button_layout.addWidget(self._file_edit)
+        self._button_layout.addWidget(self._new_filename_line_edit)
         self._layout = QVBoxLayout()
         self._layout.addWidget(self._grid_widget)
         self._layout.addLayout(self._button_layout)
         self.addLayout(self._layout)
 
     def save_data(self):
-        file_path = 'settings/' + self._file_edit.text() + ".csv"
+        file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
         if file_path:
             self._data = self._grid_widget._table_model._data
 
@@ -98,12 +106,18 @@ class PandasGridLayout(QVBoxLayout):
             self._data.to_csv(file_path, index=False)
 
     def load_data(self):
-        file_path = 'settings/' + self._file_edit.text() + ".csv"
+        # file_path = 'settings/' + self._new_filename_line_edit.text() + ".csv"
+        file_path = 'settings/' + self._fileselect_combo.currentText() + ".csv"
+
         if file_path:
             self._data = pd.read_csv(file_path)
             self._grid_widget.set_data(self._data)
 
-
+    def update_line_edit(self, index):
+        # Get the current text in the combo box
+        current_text = self._fileselect_combo.itemText(index)
+        # Set the text in the line edit
+        self._new_filename_line_edit.setText(current_text)
 
 
 class PandasGridWidget(QWidget):

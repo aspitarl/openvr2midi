@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableView, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QFileDialog, QGridLayout, QLabel, QSpinBox, QLineEdit, QComboBox, QCheckBox, QDateEdit, QDateTimeEdit, QTimeEdit, QDoubleSpinBox
+from PyQt5.QtCore import QModelIndex
 import os
 
 # missing imports
@@ -137,6 +138,20 @@ class PandasGridWidget(QWidget):
 
     def set_data(self, data):
         self._table_model._data = data
+
+        # Emit dataChanged signal to update the table view
+        # The dataChanged signal in Qt's model/view framework is designed to notify views and other interested parties that a portion of the model's data has changed.
+        # If you emit the dataChanged signal without any parameters, it won't know which data has changed, and it may not trigger the expected updates in the views. This is why you need to provide the QModelIndex parameters.
+
+        # Emit dataChanged signal to update the table view
+        top_left = self._table_model.index(0, 0)
+        parent = QModelIndex()  # Create an invalid QModelIndex
+        bottom_right = self._table_model.index(self._table_model.rowCount(parent) - 1, self._table_model.columnCount(parent) - 1)
+
+        self._table_model.dataChanged.emit(top_left, bottom_right)
+
+
+
         self._load_data()
               
 

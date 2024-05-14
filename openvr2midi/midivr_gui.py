@@ -230,7 +230,8 @@ class MainWidget(QtWidgets.QWidget):
         try:
             self.models = {controller: self.v.devices[controller].get_model() for controller in present_controllers}
         except OSError as e:
-            raise e
+            # raise e
+            print("Got OSError, happens when first starting SteamVR, just try again")
         else:
             self.combobox_objects.clear()
             display_text = ["{}: {}".format(c, str(self.models[c])) for c in self.models.keys()]

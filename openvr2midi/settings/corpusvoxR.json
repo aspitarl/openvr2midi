@@ -5,8 +5,8 @@
             "CC": 22,
             "send": true,
             "solo": false,
-            "min_range": -0.8765640259,
-            "max_range": 0.1272697449,
+            "min_range": -0.20651698112487793,
+            "max_range": -0.03009629249572754,
             "invert": false
         },
         {
@@ -14,8 +14,8 @@
             "CC": 23,
             "send": true,
             "solo": false,
-            "min_range": 1.298746109,
-            "max_range": 1.6021338700999999,
+            "min_range": -0.3244725465774536,
+            "max_range": -0.07757434248924255,
             "invert": false
         },
         {
@@ -23,8 +23,8 @@
             "CC": 24,
             "send": true,
             "solo": false,
-            "min_range": -2.387378931,
-            "max_range": -2.1870243549,
+            "min_range": 0.7230548858642578,
+            "max_range": 0.9520449638366699,
             "invert": false
         },
         {
@@ -32,8 +32,8 @@
             "CC": 25,
             "send": true,
             "solo": false,
-            "min_range": 176.558507102,
-            "max_range": 323.5619869338,
+            "min_range": 0.011896430281950643,
+            "max_range": 359.9924280522238,
             "invert": false
         },
         {
@@ -41,8 +41,8 @@
             "CC": 26,
             "send": true,
             "solo": false,
-            "min_range": 0.0030365447,
-            "max_range": 359.9952916508,
+            "min_range": 23.043356109201483,
+            "max_range": 73.79929610044914,
             "invert": false
         },
         {
@@ -50,8 +50,8 @@
             "CC": 27,
             "send": true,
             "solo": false,
-            "min_range": 179.0848694098,
-            "max_range": 203.5442578193,
+            "min_range": 0.00010682826584229588,
+            "max_range": 359.99778887757884,
             "invert": false
         },
         {
@@ -64,7 +64,7 @@
             "invert": false
         }
     ],
-    "half_y_mode": false,
-    "yaw_x_factor": false,
-    "yaw_y_factor": false
+    "half_y_mode": true,
+    "yaw_x_factor": true,
+    "yaw_y_factor": true
 }

@@ -65,6 +65,6 @@
         }
     ],
     "half_y_mode": false,
-    "yaw_x_factor": false,
-    "yaw_y_factor": false
+    "yaw_x_factor": true,
+    "yaw_y_factor": true
 }

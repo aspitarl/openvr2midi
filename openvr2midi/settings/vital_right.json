@@ -1,0 +1,70 @@
+{
+    "dataframe": [
+        {
+            "dim": "x",
+            "CC": 22,
+            "send": true,
+            "solo": false,
+            "min_range": -1.2210630178451538,
+            "max_range": -0.6635183095932007,
+            "invert": false
+        },
+        {
+            "dim": "y",
+            "CC": 23,
+            "send": true,
+            "solo": false,
+            "min_range": 0.43987488746643066,
+            "max_range": 1.022842526435852,
+            "invert": false
+        },
+        {
+            "dim": "z",
+            "CC": 24,
+            "send": true,
+            "solo": false,
+            "min_range": -4.335093021392822,
+            "max_range": -3.5855746269226074,
+            "invert": false
+        },
+        {
+            "dim": "roll",
+            "CC": 25,
+            "send": true,
+            "solo": false,
+            "min_range": 238.18194820526418,
+            "max_range": 295.529189122085,
+            "invert": false
+        },
+        {
+            "dim": "pitch",
+            "CC": 26,
+            "send": true,
+            "solo": false,
+            "min_range": 61.43508485263564,
+            "max_range": 278.1118326285852,
+            "invert": false
+        },
+        {
+            "dim": "yaw",
+            "CC": 27,
+            "send": true,
+            "solo": false,
+            "min_range": 234.72321082986667,
+            "max_range": 319.24583247123576,
+            "invert": false
+        },
+        {
+            "dim": "trigger",
+            "CC": 28,
+            "send": true,
+            "solo": false,
+            "min_range": 0.0,
+            "max_range": 1.0,
+            "invert": false
+        }
+    ],
+    "half_y_mode": true,
+    "yaw_x_factor": false,
+    "yaw_y_factor": false
+}

@@ -21,7 +21,7 @@ class OSCLayout(QtWidgets.QVBoxLayout):
         self.addWidget(self.enable_OSC)
 
         self.ip = '192.168.10.255'
-        self.port = 10000
+        self.port = 8888
 
 
 # class SignalSelectLayout(QtWidgets.QVBoxLayout):

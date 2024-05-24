@@ -105,7 +105,7 @@ class DataThread(QtCore.QThread):
 
 
                                 if self.OSC_client != None:
-                                    self.OSC_client.send_message("/{}/{}".format('right', dim), data_scaled/127)
+                                    self.OSC_client.send_message("/{}/{}".format('VR', dim), data_scaled/127)
 
                                 if dim == 'y':
                                     haptic_threshold = 40

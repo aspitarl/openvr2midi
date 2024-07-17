@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIntValidator, QGuiApplication
 from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QFileSystemWatcher
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QValidator
 import sys
@@ -39,13 +39,16 @@ default_cc_dict_controllers = {
     'trigger':38,
     }
 }
+class FileNameValidator(QValidator):
+    def __init__(self, parent=None):
+        super(FileNameValidator, self).__init__(parent)
 
-class AlphaNumericValidator(QValidator):
-    def validate(self, input_str, pos):
-        if input_str.isalnum():
-            return QValidator.Acceptable, input_str, pos
+    def validate(self, input, pos):
+        invalid_chars = set('\/:*?"<>|')
+        if any(char in invalid_chars for char in input) or input in ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9']:
+            return QValidator.Invalid, input, pos
         else:
-            return QValidator.Invalid, input_str, pos
+            return QValidator.Acceptable, input, pos
 
 settings_dir = 'settings/'
 
@@ -112,16 +115,23 @@ class MainWidget(QtWidgets.QWidget):
         self._save_button.clicked.connect(self.save_data)
 
         self._fileselect_combo = QComboBox()
+        # Step 1: Create the refresh button
+        self._refresh_button = QPushButton("Refresh")
+        self._refresh_button.clicked.connect(self.update_file_list)  # Assuming update_file_list() refreshes the combo box
+
+        # add file list to combo box
+        self.update_file_list()
         # Add all files in the settings directory to the combo box
-        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.json')])
         self._fileselect_combo.currentIndexChanged.connect(self.update_line_edit)
 
+
         self._new_filename_line_edit = QLineEdit()
-        self._new_filename_line_edit.setValidator(AlphaNumericValidator(self._new_filename_line_edit))
+        self._new_filename_line_edit.setValidator(FileNameValidator(self._new_filename_line_edit))
         self.update_line_edit(0)
         # # Signal selection and data thread 
 
         self.settings_layout.addWidget(self._fileselect_combo)
+        self.settings_layout.addWidget(self._refresh_button)
         self.settings_layout.addWidget(self._load_button)
         self.settings_layout.addWidget(self._save_button)
         self.settings_layout.addWidget(self._new_filename_line_edit)
@@ -144,10 +154,7 @@ class MainWidget(QtWidgets.QWidget):
         #Thread for obtaining and sending out data
         self.datathread = DataThread(table_model=self.CC_grid_widget._table_model)
 
-        self.OSC_layout = OSCLayout()
-        layout.addLayout(self.OSC_layout)
-        self.OSC_layout.enable_OSC.setChecked(False)
-        self.OSC_layout.enable_OSC.stateChanged.connect(self.enable_disable_OSC)
+
 
         # Extra settings
 
@@ -170,6 +177,24 @@ class MainWidget(QtWidgets.QWidget):
         self.checkbox_yaw_y_factor.setChecked(False)
         self.checkbox_yaw_y_factor.stateChanged.connect(lambda: setattr(self.datathread, 'yaw_y_factor', -1 if self.checkbox_yaw_y_factor.isChecked() else 1))
 
+        # two more checkboxes for enable_haptic and always_send in the data thread
+
+        self.checkbox_enable_haptic = QCheckBox('Enable Haptic')
+        self.checkbox_enable_haptic.setChecked(self.datathread.enable_haptic)
+        self.checkbox_enable_haptic.stateChanged.connect(lambda: setattr(self.datathread, 'enable_haptic', self.checkbox_enable_haptic.isChecked()))
+
+        self.checkbox_always_send = QCheckBox('Always Send')
+        self.checkbox_always_send.setChecked(self.datathread.always_send)
+        self.checkbox_always_send.stateChanged.connect(lambda: setattr(self.datathread, 'always_send', self.checkbox_always_send.isChecked()))
+
+        self.checkbox_range_set = QCheckBox('Range Set Mode')
+        self.checkbox_range_set.setChecked(self.datathread.manual_range_set)
+        self.checkbox_range_set.stateChanged.connect(lambda: setattr(self.datathread, 'manual_range_set', self.checkbox_range_set.isChecked()))
+
+        self.OSC_layout = OSCLayout()
+        self.OSC_layout.enable_OSC.setChecked(False)
+        self.OSC_layout.enable_OSC.stateChanged.connect(self.enable_disable_OSC)
+
         # make a grid layout for all extra settings checkboxes and add it to the main layout
 
         extra_settings_layout = QGridLayout()
@@ -177,6 +202,11 @@ class MainWidget(QtWidgets.QWidget):
         extra_settings_layout.addWidget(self.checkbox_debug, 0, 1)
         extra_settings_layout.addWidget(self.checkbox_yaw_x_factor, 1, 0)
         extra_settings_layout.addWidget(self.checkbox_yaw_y_factor, 1, 1)
+        extra_settings_layout.addWidget(self.checkbox_enable_haptic, 2, 0)
+        extra_settings_layout.addWidget(self.checkbox_always_send, 2, 1)
+        extra_settings_layout.addWidget(self.checkbox_range_set, 3, 0)
+        extra_settings_layout.addLayout(self.OSC_layout, 4, 0, 1, 2)
+
 
         layout.addLayout(extra_settings_layout)
 
@@ -189,6 +219,12 @@ class MainWidget(QtWidgets.QWidget):
         self.datathread.debug_signal.connect(self.debug_console.setText)
 
         self.setLayout(layout)
+
+
+
+    def update_file_list(self):
+        self._fileselect_combo.clear()
+        self._fileselect_combo.addItems([f.split('.')[0] for f in os.listdir('settings') if f.endswith('.json')])
 
     def get_selected_controller_name(self):
         # The midi port seems to have random numbers at the end, so just extract the name to use in dicts etc.
@@ -225,8 +261,11 @@ class MainWidget(QtWidgets.QWidget):
 
         self.v = triad_openvr.triad_openvr()
 
+        present_controllers = self.v.devices
+
         #Indicate what controller belongs to which hand...Must be a more elegant way...
-        present_controllers = [key for key in self.v.devices if 'controller' in key]
+        show_keys = ['controller', 'tracker']
+        present_controllers = [key for key in present_controllers if any([s in key for s in show_keys])]
         try:
             self.models = {controller: self.v.devices[controller].get_model() for controller in present_controllers}
         except OSError as e:

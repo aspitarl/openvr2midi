@@ -36,6 +36,8 @@ class DataThread(QtCore.QThread):
         self.enable_half_y = True
         self.OSC_client = None
         self.enable_haptic = True
+        self.always_send = False
+        self.manual_range_set = False
 
         self.yaw_y_factor = 1.0
         self.yaw_x_factor = 1.0
@@ -79,13 +81,13 @@ class DataThread(QtCore.QThread):
                     time.sleep(1)
 
                 #TODO: Move this into it's own class function here?
-                if inputs['button'] == RANGE_SET_BUTTON and pose != None:
+                if (inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set) and pose != None:
                     #enter range set mode
                     self.range_set_mode(self.contr)
                     self.update_table_model_cube_ranges()
 
                 if pose is not None:   
-                    if inputs['trackpad_touched']:                    
+                    if inputs['trackpad_touched'] or self.always_send:                    
                         trigger = inputs['trigger']
 
                         for dim in self.cc_dict:
@@ -139,7 +141,7 @@ class DataThread(QtCore.QThread):
             'roll': {'min': pose['roll'], 'max': pose['roll']}
         }      
 
-        while(inputs['button'] == RANGE_SET_BUTTON):
+        while(inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set):
 
             inputs, pose = get_inputs_and_pose(contr, self.yaw_x_factor, self.yaw_y_factor)
 
@@ -154,6 +156,8 @@ class DataThread(QtCore.QThread):
             if sleep_time>0:
                 time.sleep(sleep_time)
 
+
+        self.debug_signal.emit("exited range set mode with ranges: \n" + str(self.cube_ranges))
 class TextUpdateThread(QtCore.QThread):
     """
     Unsuccessful attempt to enable debugging with a parallel thread that would update the debug texteditwidget

@@ -16,6 +16,7 @@ direction_dict = {
     'yaw': 1.0,
     'pitch': 1.0,
     'roll': 1.0,
+    'velocity': 1.0
 }
 
 
@@ -65,6 +66,8 @@ def get_inputs_and_pose_dict(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
         pose_dict = None
     else:
         positionarray = convert_to_euler(pose[contr.index].mDeviceToAbsoluteTracking, yaw_x_factor=yaw_x_factor, yaw_y_factor=yaw_y_factor) 
+
+        velocity = pose[contr.index].vVelocity
         
         pose_dict = { 
             'x': positionarray[0],
@@ -72,7 +75,8 @@ def get_inputs_and_pose_dict(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
             'z': positionarray[2],
             'yaw': positionarray[3] + 180,
             'pitch': positionarray[4] + 180,
-            'roll': positionarray[5] + 180
+            'roll': positionarray[5] + 180,
+            'velocity': np.linalg.norm([velocity.v[0], velocity.v[1], velocity.v[2]]),
             }
 
         pose_dict = {dim: val*direction_dict[dim] for dim, val in pose_dict.items()}

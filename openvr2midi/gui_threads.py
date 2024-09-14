@@ -42,6 +42,9 @@ class DataThread(QtCore.QThread):
         self.yaw_y_factor = 1.0
         self.yaw_x_factor = 1.0
 
+        self.input_dict = None
+        self.pose_dict = None
+
     def update_dicts(self):
         df_table = self._table_model._data
         df_table = df_table[df_table['send'].astype(bool) == True]
@@ -72,23 +75,23 @@ class DataThread(QtCore.QThread):
                 if self.enable_haptic: haptic_loop_counter += 1
                 start = time.time()
                 
-                inputs, pose_dict = get_inputs_and_pose_dict(self.contr, self.yaw_x_factor, self.yaw_y_factor)
+                self.input_dict, self.pose_dict = get_inputs_and_pose_dict(self.contr, self.yaw_x_factor, self.yaw_y_factor)
 
                 if self.debug:
-                    debug_str = str(inputs) + '\n\n' + str(pose_dict) + '\n\n' + str(self.cube_ranges)
+                    debug_str = str(self.input_dict) + '\n\n' + str(self.pose_dict) + '\n\n' + str(self.cube_ranges)
                     self.debug_signal.emit(debug_str)
                     #TODO: how to remove this sleep here, can't figure out how to regulate handling of this signal in parent
                     time.sleep(1)
 
                 #TODO: Move this into it's own class function here?
-                if (inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set) and pose_dict != None:
+                if (self.input_dict['button'] == RANGE_SET_BUTTON or self.manual_range_set) and self.pose_dict != None:
                     #enter range set mode
                     self.range_set_mode(self.contr)
                     self.update_table_model_cube_ranges()
 
-                if pose_dict is not None:   
-                    if inputs['trackpad_touched'] or self.always_send:                    
-                        trigger = inputs['trigger']
+                if self.pose_dict is not None:   
+                    if self.input_dict['trackpad_touched'] or self.always_send:                    
+                        trigger = self.input_dict['trigger']
 
                         for dim in self.cc_dict:
                             if self.cc_dict[dim]:
@@ -100,7 +103,7 @@ class DataThread(QtCore.QThread):
                                     else:
                                         half_mode = False
                                         
-                                    data_scaled = scale_data(pose_dict, self.cube_ranges, dim, half=half_mode)
+                                    data_scaled = scale_data(self.pose_dict, self.cube_ranges, dim, half=half_mode)
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            

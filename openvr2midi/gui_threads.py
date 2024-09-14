@@ -3,7 +3,7 @@ import time
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-from utils import get_inputs_and_pose, scale_data
+from utils import get_inputs_and_pose_dict, scale_data
 from utils import MIDI_CC_MAX, SEND_DATA_BUTTON, RANGE_SET_BUTTON, WAIT_INTERVAL
 
 import mido
@@ -72,21 +72,21 @@ class DataThread(QtCore.QThread):
                 if self.enable_haptic: haptic_loop_counter += 1
                 start = time.time()
                 
-                inputs, pose = get_inputs_and_pose(self.contr, self.yaw_x_factor, self.yaw_y_factor)
+                inputs, pose_dict = get_inputs_and_pose_dict(self.contr, self.yaw_x_factor, self.yaw_y_factor)
 
                 if self.debug:
-                    debug_str = str(inputs) + '\n\n' + str(pose) + '\n\n' + str(self.cube_ranges)
+                    debug_str = str(inputs) + '\n\n' + str(pose_dict) + '\n\n' + str(self.cube_ranges)
                     self.debug_signal.emit(debug_str)
                     #TODO: how to remove this sleep here, can't figure out how to regulate handling of this signal in parent
                     time.sleep(1)
 
                 #TODO: Move this into it's own class function here?
-                if (inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set) and pose != None:
+                if (inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set) and pose_dict != None:
                     #enter range set mode
                     self.range_set_mode(self.contr)
                     self.update_table_model_cube_ranges()
 
-                if pose is not None:   
+                if pose_dict is not None:   
                     if inputs['trackpad_touched'] or self.always_send:                    
                         trigger = inputs['trigger']
 
@@ -100,7 +100,7 @@ class DataThread(QtCore.QThread):
                                     else:
                                         half_mode = False
                                         
-                                    data_scaled = scale_data(pose, self.cube_ranges, dim, half=half_mode)
+                                    data_scaled = scale_data(pose_dict, self.cube_ranges, dim, half=half_mode)
 
                                 cc = mido.Message('control_change',control=self.cc_dict[dim], value=data_scaled)
                                 self.midiout.send(cc)            
@@ -130,27 +130,27 @@ class DataThread(QtCore.QThread):
         self.debug_signal.emit("entering range set mode")
         start = time.time()
 
-        inputs, pose = get_inputs_and_pose(contr, self.yaw_x_factor, self.yaw_y_factor)
+        inputs, pose_dict = get_inputs_and_pose_dict(contr, self.yaw_x_factor, self.yaw_y_factor)
 
         self.cube_ranges = {
-            'x': {'min': pose['x'], 'max': pose['x']},
-            'y': {'min': pose['y'], 'max': pose['y']},
-            'z': {'min': pose['z'], 'max': pose['z']},
-            'yaw': {'min': pose['yaw'], 'max': pose['yaw']},
-            'pitch': {'min': pose['pitch'], 'max': pose['pitch']},
-            'roll': {'min': pose['roll'], 'max': pose['roll']}
+            'x': {'min': pose_dict['x'], 'max': pose_dict['x']},
+            'y': {'min': pose_dict['y'], 'max': pose_dict['y']},
+            'z': {'min': pose_dict['z'], 'max': pose_dict['z']},
+            'yaw': {'min': pose_dict['yaw'], 'max': pose_dict['yaw']},
+            'pitch': {'min': pose_dict['pitch'], 'max': pose_dict['pitch']},
+            'roll': {'min': pose_dict['roll'], 'max': pose_dict['roll']}
         }      
 
         while(inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set):
 
-            inputs, pose = get_inputs_and_pose(contr, self.yaw_x_factor, self.yaw_y_factor)
+            inputs, pose_dict = get_inputs_and_pose_dict(contr, self.yaw_x_factor, self.yaw_y_factor)
 
-            if pose is not None:
-                for dim in pose:
-                    if pose[dim] < self.cube_ranges[dim]['min']:
-                        self.cube_ranges[dim]['min'] = pose[dim]
-                    elif pose[dim] > self.cube_ranges[dim]['max']:
-                        self.cube_ranges[dim]['max'] = pose[dim]
+            if pose_dict is not None:
+                for dim in pose_dict:
+                    if pose_dict[dim] < self.cube_ranges[dim]['min']:
+                        self.cube_ranges[dim]['min'] = pose_dict[dim]
+                    elif pose_dict[dim] > self.cube_ranges[dim]['max']:
+                        self.cube_ranges[dim]['max'] = pose_dict[dim]
 
             sleep_time = WAIT_INTERVAL-(time.time()-start)
             if sleep_time>0:
@@ -179,8 +179,8 @@ class TextUpdateThread(QtCore.QThread):
     def stop(self):
         self._isRunning = False
 
-    def update_text(self, input, pose):
-        text = str(input) + '\n\n ' + str(pose)
+    def update_text(self, input, pose_dict):
+        text = str(input) + '\n\n ' + str(pose_dict)
         self.display_text = text
 
 

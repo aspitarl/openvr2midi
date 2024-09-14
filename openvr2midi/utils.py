@@ -1,5 +1,7 @@
 import numpy as np 
 
+from triad_openvr.triad_openvr import convert_to_euler, get_pose
+
 MIDI_CC_MAX = 127
 RANGE_SET_BUTTON = 'b'
 SEND_DATA_BUTTON = 'a'
@@ -55,14 +57,16 @@ def scale_data(data_raw, cube_ranges, dim, half):
 
 
     
-def get_inputs_and_pose(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
+def get_inputs_and_pose_dict(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
     #Pose
-    positionarray = contr.get_pose_euler(yaw_x_factor=yaw_x_factor, yaw_y_factor=yaw_y_factor)
+    pose = get_pose(contr.vr)
 
-    if positionarray == None:
-        pose = None
+    if not pose[contr.index].bPoseIsValid:
+        pose_dict = None
     else:
-        pose = { #TODO: Integrate with triad data representation better?
+        positionarray = convert_to_euler(pose[contr.index].mDeviceToAbsoluteTracking, yaw_x_factor=yaw_x_factor, yaw_y_factor=yaw_y_factor) 
+        
+        pose_dict = { 
             'x': positionarray[0],
             'y': positionarray[1],
             'z': positionarray[2],
@@ -71,7 +75,7 @@ def get_inputs_and_pose(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
             'roll': positionarray[5] + 180
             }
 
-        pose = {dim: val*direction_dict[dim] for dim, val in pose.items()}
+        pose_dict = {dim: val*direction_dict[dim] for dim, val in pose_dict.items()}
     #Inputs
     inputs = contr.get_controller_inputs()
 
@@ -83,5 +87,5 @@ def get_inputs_and_pose(contr, yaw_x_factor=1.0, yaw_y_factor=1.0):
     else:
         inputs['button'] = None
 
-    return inputs, pose
+    return inputs, pose_dict
   

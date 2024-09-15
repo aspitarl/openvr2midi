@@ -141,7 +141,8 @@ class DataThread(QtCore.QThread):
             'z': {'min': pose_dict['z'], 'max': pose_dict['z']},
             'yaw': {'min': pose_dict['yaw'], 'max': pose_dict['yaw']},
             'pitch': {'min': pose_dict['pitch'], 'max': pose_dict['pitch']},
-            'roll': {'min': pose_dict['roll'], 'max': pose_dict['roll']}
+            'roll': {'min': pose_dict['roll'], 'max': pose_dict['roll']},
+            'velocity': {'min': pose_dict['velocity'], 'max': pose_dict['velocity']}
         }      
 
         while(inputs['button'] == RANGE_SET_BUTTON or self.manual_range_set):

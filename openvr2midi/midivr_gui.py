@@ -28,6 +28,7 @@ default_cc_dict_controllers = {
     'pitch': 26,
     'roll': 27,
     'trigger':28,
+    'velocity':29,
 },
     'Left Controller': {
     'x': 32,
@@ -37,6 +38,7 @@ default_cc_dict_controllers = {
     'pitch': 36,
     'roll': 37,
     'trigger':38,
+    'velocity':39,
     }
 }
 class FileNameValidator(QValidator):

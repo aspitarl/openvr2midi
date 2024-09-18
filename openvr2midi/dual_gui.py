@@ -137,6 +137,14 @@ class SideBySideMainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
         
+        # #thin top layout for global conrol
+        # top_layout = QtWidgets.QHBoxLayout()
+
+        # initialize_button = QtWidgets.QPushButton("Initialize")
+        # initialize_button.clicked.connect(self.initial_setup_and_connect)
+
+        # top_layout.addWidget(initialize_button)
+        # layout.addLayout(top_layout)
 
         
         # Create a horizontal layout for the main widgets
@@ -155,20 +163,36 @@ class SideBySideMainWindow(QtWidgets.QMainWindow):
 
         self.initial_setup_and_connect()
 
-
     def initial_setup_and_connect(self):
 
-        self.main_widget1.combobox_midichans.setCurrentIndex(1)
-        self.main_widget2.combobox_midichans.setCurrentIndex(0)
+        try:
 
-        self.main_widget1.discover_objects()
-        self.main_widget2.discover_objects()
+            self.main_widget1.combobox_midichans.setCurrentIndex(1)
+            self.main_widget2.combobox_midichans.setCurrentIndex(0)
 
-        self.main_widget1.combobox_objects.setCurrentIndex(1)
-        self.main_widget2.combobox_objects.setCurrentIndex(0)
+            self.main_widget1.discover_objects()
+            self.main_widget2.discover_objects()
 
-        self.main_widget1.connect_object()
-        self.main_widget2.connect_object()
+            # get the list of strings from the comboboxes
+
+            cb1_strings = [self.main_widget1.combobox_objects.itemText(i) for i in range(self.main_widget1.combobox_objects.count())]
+        
+            # If 'Left' is in the list, set the index to that
+            for i, s in enumerate(cb1_strings):
+                if 'Left' in s:
+                    self.main_widget1.combobox_objects.setCurrentIndex(i)
+                    self.main_widget1.connect_object()
+
+            cb2_strings = [self.main_widget2.combobox_objects.itemText(i) for i in range(self.main_widget2.combobox_objects.count())]
+
+            # If 'Right' is in the list, set the index to that
+            for i, s in enumerate(cb2_strings):
+                if 'Right' in s:
+                    self.main_widget2.combobox_objects.setCurrentIndex(i)
+                    self.main_widget2.connect_object()
+
+        except Exception as e:
+            print(f"Initialization Error: {e}")
 
 
 

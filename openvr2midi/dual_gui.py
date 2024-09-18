@@ -14,17 +14,13 @@ class PollingThread(QtCore.QThread):
 
     def run(self):
         self.running = True
+        pose_dict1 = None
+        pose_dict2 = None
+
         while self.running:
-            # Poll pose_dict from each main_widget
-            pose_dict1 = self.main_widget1.datathread.pose_dict
-            pose_dict2 = self.main_widget2.datathread.pose_dict
             input_dict1 = self.main_widget1.datathread.input_dict
             input_dict2 = self.main_widget2.datathread.input_dict
 
-            if pose_dict1 is None or pose_dict2 is None:
-                # restart the loop
-                self.msleep(100)  # Sleep for 100 milliseconds
-                continue
 
             if input_dict1 is None or input_dict2 is None:
                 # restart the loop
@@ -33,6 +29,22 @@ class PollingThread(QtCore.QThread):
 
             if input_dict1['trackpad_touched'] or input_dict2['trackpad_touched']:
                 # one is enabled, calculate the difference
+
+                # Poll pose_dict from each main_widget
+                # TODO: hacky way to allow for calculation based on previous pose_dict, by checking if the trackpad is touched for each controller and using the previous value if not
+                temp_pose_dict1 = self.main_widget1.datathread.pose_dict
+                temp_pose_dict2 = self.main_widget2.datathread.pose_dict
+
+                if input_dict1['trackpad_touched']:
+                    pose_dict1 = temp_pose_dict1
+                if input_dict2['trackpad_touched']:
+                    pose_dict2 = temp_pose_dict2
+
+                #TODO: this wont be None after the first iteration, handle better. 
+                if pose_dict1 is None or pose_dict1 is None:
+                    # restart the loop
+                    self.msleep(100)  # Sleep for 100 milliseconds
+                    continue
 
                 # Calculate the difference between the two pose_dicts
                 pose_diff = {dim: pose_dict1[dim] - pose_dict2[dim] for dim in pose_dict1 if dim in ['x', 'y', 'z']}
@@ -57,8 +69,7 @@ class PollingThread(QtCore.QThread):
                 if invert:
                     cc_out = 127 - cc_out
 
-
-                cc = mido.Message('control_change', control=cc_value, value=int(dist_norm*127))
+                cc = mido.Message('control_change', control=cc_value, value=cc_out)
                 # Just send out widget 2's (right) cc for now...
                 self.main_widget2.datathread.midiout.send(cc)            
 

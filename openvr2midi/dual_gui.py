@@ -41,7 +41,7 @@ class PollingThread(QtCore.QThread):
                     pose_dict2 = temp_pose_dict2
 
                 #TODO: this wont be None after the first iteration, handle better. 
-                if pose_dict1 is None or pose_dict1 is None:
+                if pose_dict1 is None or pose_dict2 is None:
                     # restart the loop
                     self.msleep(100)  # Sleep for 100 milliseconds
                     continue

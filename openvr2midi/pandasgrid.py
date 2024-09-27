@@ -112,10 +112,10 @@ class PandasGridWidget(QWidget):
 
     def _disable_send_checkboxes(self, state, row):
         send_checkbox_column = 2
-        send_column_offset = send_checkbox_column*len(self._table_model._data.columns)
+        send_column_offset = send_checkbox_column*len(self._table_model._data)
 
         solo_checkbox_column = 3
-        solo_column_offset = solo_checkbox_column*len(self._table_model._data.columns)
+        solo_column_offset = solo_checkbox_column*len(self._table_model._data)
         if state == Qt.Checked:
             if self._current_solo_checkbox is not None:
                 self._current_solo_checkbox.setChecked(False)
